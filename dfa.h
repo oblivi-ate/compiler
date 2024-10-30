@@ -12,8 +12,8 @@ enum STATE
     READ_OVER, // read '/'
     IN_NUM,    // in number
     IN_LET,     // in identifier
-    INCOMMENT, // 对于/* */评论 
-    COMMENTING,//对于#和//评论 
+    INCOMMENT, // for /* */comment
+    COMMENTING,//for # and // comment
     WAIT_OVER, // wait for the end of comment
     DONE,      // final state
     NOT_DONE,  //not done, yet
