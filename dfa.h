@@ -11,10 +11,12 @@ enum STATE
     READ_NOT,  // read '!'
     READ_OVER, // read '/'
     IN_NUM,    // in number
-    IN_ID,     // in identifier
-    INCOMMENT, // in comment
+    IN_LET,     // in identifier
+    INCOMMENT, // 对于/* */评论 
+    COMMENTING,//对于#和//评论 
     WAIT_OVER, // wait for the end of comment
     DONE,      // final state
+    NOT_DONE,  //not done, yet
     ERROR,     // error state
     UNGET      // unget the last character
 };
