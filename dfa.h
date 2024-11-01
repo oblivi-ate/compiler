@@ -11,12 +11,12 @@ enum STATE
     READ_NOT,  // read '!'
     READ_OVER, // read '/'
     IN_NUM,    // in number
-    IN_LET,     // in identifier
+    IN_LET,    // in identifier
     INCOMMENT, // for /* */comment
-    COMMENTING,//for # and // comment
+    COMMENTING,// for # and // comment
     WAIT_OVER, // wait for the end of comment
     DONE,      // final state
-    NOT_DONE,  //not done, yet
+    NOT_DONE,  // not done, yet
     ERROR,     // error state
     UNGET      // unget the last character
 };

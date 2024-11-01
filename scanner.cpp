@@ -1,20 +1,11 @@
-#include "Scanner.h"
+#include "scanner.h"
 #include "dfa.h"
+#include "dfa.cpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
-class Scanner {
-public:
-    Scanner(std::istream& in) : in(in) {}
 
-    void scan(Token_List* token_list);
-
-private:
-    std::istream& in; // 输入流
-    char currentChar;  // 当前字符
-    int position = 0; // 当前位置
-};
 
 void Scanner::scan(Token_List* token_list) {
     initdfa(); // 初始化dfa状态
@@ -67,7 +58,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Token_List token_list; // 用于存储token的链表
+    Token_List *token_list = new Token_List; // 用于存储token的链表
     Scanner scanner(inputFile);
     scanner.scan(&token_list);
 
