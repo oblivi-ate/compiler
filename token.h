@@ -63,5 +63,6 @@ struct Token_List{
 };
 
 void addToken(Token_List *token_list, Token token, int line);
+void printToken(Token_List *token_list);
 
 #endif

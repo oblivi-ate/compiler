@@ -23,6 +23,6 @@ enum STATE
 
 void initdfa();
 
-void dfa(std::string str, Token_List *token_list);
+void Transition(char c, Token_List *tk, bool is_EOF);
 
 #endif

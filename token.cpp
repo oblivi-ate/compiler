@@ -57,8 +57,8 @@ void printToken(Token_List *token_list)
 {
     Token_List *current = token_list;
     while (current != nullptr)
-    {
-        std::cout << "Line " << current->line << " --- " << token_table[current->token.type] << " : " << current->token.info << std::endl;
+    {  
+        std::cout << "Line " << current->line << " --- " << token_table[current->token.type] << " : " << current->token.info << std::endl;  
         current = current->next;
     }
 }
