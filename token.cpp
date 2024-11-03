@@ -38,10 +38,11 @@ std::unordered_map<TokenType, std::string> token_table = {
     {TokenType::WS, "WS"},
     {TokenType::ID, "ID"},
     {TokenType::INDENT, "INDENT"},
-    {TokenType::ERROR, "ERROR"},
+    {TokenType::ERR, "ERROR"},
     {TokenType::ENTER, "ENTER"},
     {TokenType::ENDFILE, "ENDFILE"},
-    {TokenType::START, "START"},
+    {TokenType::ST, "START"},
+
     // ...
 };
 
@@ -65,7 +66,7 @@ void printToken(Token_List *token_list)
 
 void testToken()
 {
-    Token_List *token_list = new Token_List(Token(ERROR, "error"), -1);
+    Token_List *token_list = new Token_List(Token(ERR, "error"), -1);
     addToken(token_list, Token(IF, "if"), 1);
     printToken(token_list);
     printf("Test passed.\n");

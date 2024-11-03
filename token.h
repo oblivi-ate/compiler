@@ -1,6 +1,5 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
-
 #include <string>
 
 enum TokenType 
@@ -22,13 +21,13 @@ enum TokenType
     // indentation
     INDENT,
     // error
-    ERROR,
+    ERR,
     // new line
     ENTER,
     // end of file
     ENDFILE,
     // start of the scanner
-    START,
+    ST,
     // ...
 
 };

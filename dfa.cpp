@@ -4,10 +4,9 @@
 #include <utility>
 #include <string>
 
-STATE currentstate = START;
-int currentpos = 0;
-int line = 1;
-std::string info = "";
+STATE currentstate;
+int line;
+std::string info;
 
 std::unordered_map<Token, std::string> keywords = {
     {Token(IF, "if"), "if"},
@@ -43,306 +42,321 @@ std::unordered_map<Token, std::string> keywords = {
     {Token(MOD, "MOD"), "mod"},
     {Token(ENTER, "enter"), "enter"},
     {Token(ENDFILE, "endfile"), "endfile"},
-
     // ...
 };
 
 void Transition(char c, Token_List *tk, bool is_EOF)
 {
-    if (is_EOF)
+    printf("currentstate: %d\n", currentstate);
+    if (is_EOF) // read the end of file
     {
+        if(currentstate == INCOMMENT || currentstate == WAIT_OVER || currentstate == COMMENTING)
+        {
+            currentstate = (STATE)ERROR;
+            addToken(tk, Token((TokenType)ERROR, "ERROR! Comment is not closed!"), line);
+            return;
+        }
         currentstate = DONE;
-        currentpos++;
         addToken(tk, Token(ENDFILE, ""), line);
         return;
     }
-    if (currentstate == START || currentstate == NOT_DONE || currentstate == DONE)
+    if (currentstate == DONE) // DONE->START
+    {
+        currentstate = START;
+        Transition(c, tk, is_EOF);
+        return;
+    }
+    if (currentstate == (STATE)START) // initial state
     {
         switch (c)
         {
         case '+':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(PLUS, "PLUS"), line);
-            break;
+            return;
         case '-':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(MINUS, "MINUS"), line);
-            break;
+            return;
         case '*':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(TIMES, "TIMES"), line);
-            break;
+            return;
         case '%':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(MOD, "MOD"), line);
-            break;
+            return;
         case ';':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(SEMICOLON, "SEMICOLON"), line);
-            break;
+            return;
         case ',':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(COMMA, "COMMA"), line);
-            break;
+            return;
         case '(':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(LPAREN, "LPAREN"), line);
-            break;
+            return;
         case ')':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(RPAREN, "RPAREN"), line);
-            break;
+            return;
         case '[':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(LBRACKET, "LBRACKET"), line);
-            break;
+            return;
         case ']':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(RBRACKET, "RBRACKET"), line);
-            break;
+            return;
         case '{':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(LBRACE, "LBRACE"), line);
-            break;
+            return;
         case '}':
             currentstate = DONE;
-            currentpos++;
             addToken(tk, Token(RBRACE, "RBRACE"), line);
-            break;
+            return;
+        case '\n':
+            currentstate = DONE;
+            addToken(tk, Token(ENTER, "ENTER"), line);
+            line++;
+            return;
+        case ' ':
+            currentstate = DONE;
+            addToken(tk, Token(WS, "WS"), line);
+            return;
         case '=':
             currentstate = READ_EQ;
-            currentpos++;
-            break;
+            return;
         case '>':
             currentstate = READ_GT;
-            currentpos++;
-            break;
+            return;
         case '!':
             currentstate = READ_NOT;
-            currentpos++;
-            break;
+            return;
         case '<':
             currentstate = READ_LT;
-            currentpos++;
-            break;
+            return;
         case '/':
             currentstate = READ_OVER;
-            currentpos++;
+            info += c; 
+            return;
         case '#':
             currentstate = COMMENTING;
-            currentpos++;
+            info += c;
+            return;
             //
         case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':
             currentstate = IN_NUM;
-            currentpos++;
             info += c;
             break;
         case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z':
             currentstate = IN_LET;
-            currentpos++;
             info += c;
-            break;
+            return;
         default: // 当输入其他字符时直接报错return，在main函数循环中请加入一个判断token类型是否为error的语句，如果是则退出循环
-            currentstate = ERROR;
-            currentpos++;
+            currentstate = (STATE)ERROR;
+
             addToken(tk, Token((TokenType)ERROR, "ERROR! Illegal character!"), line);
             return;
         }
     }
-    if (currentstate == READ_EQ && is_EOF)
-    { // 当已经输入一个‘=’时
+    if (currentstate == READ_EQ && is_EOF) // 当已经输入一个‘=’时
+    {
         switch (c)
         {
         case '=': // 第二个 ‘=’ 传入， 状态为DONE，在tokenlist中加入以EQ为Tokentype的新节点
             currentstate = DONE;
             addToken(tk, Token(EQ, ""), line);
-            currentpos++;
-            break;
+            return;
         default: // 没有接收到第二个‘=’状态为NOT_DONE
             currentstate = NOT_DONE;
             addToken(tk, Token(ASSIGN, "ASSIGN"), line); // 将之前录入的单个引号打入链表
+            TransitionNotDone(c, tk, is_EOF);
+            return;
+        }
+    }
+    if (currentstate == READ_GT && is_EOF)
+    {
+        switch (c)
+        {
+        case '=':
+            currentstate = DONE;
+            addToken(tk, Token(GTE, "GREATER THAN OR EQUAL TO"), line);
+            return;
+        default:
+            currentstate = NOT_DONE;
+            addToken(tk, Token(GT, "GREATER"), line);
+            TransitionNotDone(c, tk, is_EOF);
+            return;
+        }
+    }
+    else if (currentstate == READ_LT && is_EOF)
+    {
+        switch (c)
+        {
+        case '=':
+            currentstate = DONE;
+            addToken(tk, Token(LTE, "LESS THAN OR EQUAL TO"), line);
+            return;
+        default:
+            currentstate = NOT_DONE;
+            addToken(tk, Token(LT, "LESS THAN"), line);
+            TransitionNotDone(c, tk, is_EOF);
+            return;
+        }
+    }
+    else if (currentstate == READ_NOT)
+    {
+        switch (c)
+        {
+        case '=':
+            currentstate = DONE;
+            addToken(tk, Token(NEQ, "NOT EQULA TO"), line);
+            return;
+        default: // 若读取感叹号！之后没有等号则直接报错，函数直接返回 。
+            currentstate = (STATE)ERROR;
+            addToken(tk, Token((TokenType)ERROR, "ERROR! There are only single ! appeared."), line);
+            return;
+        }
+    }
+    else if (currentstate == IN_NUM) // 前一个是数字的情况
+    {
+        switch (c)
+        {
+        case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':
+            currentstate = IN_NUM;
+            info += c;
+            return;
+        default:
+            currentstate = NOT_DONE;
+            addToken(tk, Token(NUMBER, info), line);
+            info = "";
+            TransitionNotDone(c, tk, is_EOF);
+            return;
+        }
+    }
+    else if (currentstate == IN_LET) // 前一个是字母的情况
+    { 
+        switch (c)
+        {
+        case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z':
+            currentstate = IN_LET;
+            info += c;
+            return;
+        default:
+            currentstate = NOT_DONE;
+            if (info == "if")
+            {
+                addToken(tk, Token(IF, "IF"), line);
+            }
+            else if (info == "else")
+            {
+                addToken(tk, Token(ELSE, "ELSE"), line);
+            }
+            else if (info == "while")
+            {
+                addToken(tk, Token(WHILE, "WHILE"), line);
+            }
+            else if (info == "return")
+            {
+                addToken(tk, Token(RETURN, "RETURN"), line);
+            }
+            else if (info == "int")
+            {
+                addToken(tk, Token(INT, "INT"), line);
+            }
+            else if (info == "void")
+            {
+                addToken(tk, Token(VOID, "VOID"), line);
+            }
+            else
+            {
+                addToken(tk, Token(LETTER, info), line);
+            }
+            info = "";
+            return;
+        }
+    }
+    else if (currentstate == READ_OVER) // 前一个是斜杠的情况
+    { 
+        switch (c)
+        {
+        case '/':
+            currentstate = COMMENTING; // COMMENTING是#评论和//评论的情况
+            info += c;
+            return;
+        case '*':
+            currentstate = INCOMMENT; // INCOMMENT是/*评论的情况
+            info += c;
+            return;
+        default:
+            currentstate = NOT_DONE;
+            addToken(tk, Token(DIVIDE, "DIVIDE"), line);
+            info = "";
+            TransitionNotDone(c, tk, is_EOF);
+            return;
+        }
+    }
+    else if (currentstate == COMMENTING)
+    {
+        switch (c)
+        {
+        case '\n':
+            currentstate = DONE;
+            addToken(tk, Token(COMMENT, info), line);
+            line++;
+            info = "";
+            return;
+        default:
+            info += c;
+            return;
+        }
+    }
+    if (currentstate == INCOMMENT)
+    {
+        switch (c)
+        {
+        case '*':
+            info += c;
+            currentstate = WAIT_OVER;
+            return;
+        default:
+            info += c;
+            return;
+        }
+    }
+    if (currentstate == WAIT_OVER)
+    {
+        switch (c)
+        {
+        case '*':
+            info += c;
+            return;
+        case '/':
+            currentstate = DONE;
+            info += c;
+            addToken(tk, Token(COMMENT, info), line);
+            info = "";
+        default:
+            currentstate = INCOMMENT;
+            info += c;
             break;
         }
-        if (currentstate == READ_GT && is_EOF)
-        {
-            switch (c)
-            {
-            case '=':
-                currentstate = DONE;
-                addToken(tk, Token(GTE, "GREATER THAN OR EQUAL TO"), line);
-                currentpos++;
-                break;
-            default:
-                currentstate = NOT_DONE;
-                addToken(tk, Token(GT, "GREATER"), line);
-                break;
-            }
-        }
-        if (currentstate == READ_LT && is_EOF)
-        {
-            switch (c)
-            {
-            case '=':
-                currentstate = DONE;
-                addToken(tk, Token(LTE, "LESS THAN OR EQUAL TO"), line);
-                currentpos++;
-                break;
-            default:
-                currentstate = NOT_DONE;
-                addToken(tk, Token(LT, "LESS THAN"), line);
-                break;
-            }
-        }
-        if (currentstate == READ_NOT && is_EOF)
-        {
-            switch (c)
-            {
-            case '=':
-                currentstate = DONE;
-                addToken(tk, Token(NEQ, "NOT EQULA TO"), line);
-                currentpos++;
-                break;
-            default: // 若读取感叹号！之后没有等号则直接报错，函数直接返回 。
-                currentstate = ERROR;
-                addToken(tk, Token((TokenType)ERROR, "ERROR! There are only single ! appeared."), line);
-                return;
-            }
-        }
-        if (currentstate == IN_NUM && is_EOF)
-        { // 前一个是数字的情况
-            switch (c)
-            {
-            case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':
-                currentstate = IN_NUM;
-                currentpos++;
-                info += c;
-                break;
-            default:
-                currentstate = NOT_DONE;
-                addToken(tk, Token(NUMBER, info), line);
-                info = "";
-                Transition(c, tk, is_EOF);
-                break;
-            }
-        }
-        if (currentstate == IN_LET && is_EOF)
-        { // 前一个是字母的情况
-            switch (c)
-            {
-            case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z':
-                currentstate = IN_LET;
-                currentpos++;
-                info += c;
-                break;
-            default:
-                currentstate = NOT_DONE;
-                if (info == "if") {
-                    addToken(tk, Token(IF, "IF"), line);
-                } else if (info == "else") {
-                    addToken(tk, Token(ELSE, "ELSE"), line);
-                } else if (info == "while") {
-                    addToken(tk, Token(WHILE, "WHILE"), line);
-                } else if (info == "return") {
-                    addToken(tk, Token(RETURN, "RETURN"), line);
-                } else if (info == "int") {
-                    addToken(tk, Token(INT, "INT"), line);
-                } else if (info == "void") {
-                    addToken(tk, Token(VOID, "VOID"), line);
-                } else {
-                    addToken(tk, Token(LETTER, info), line);
-                }
-                info = "";
-                break;
-            }
-        }
-        if (currentstate == READ_OVER && is_EOF)
-        { // 前一个是斜杠的情况
-            switch (c)
-            {
-            case '/':
-                currentstate = COMMENTING; // COMMENTING是#评论和//评论的情况
-                currentpos++;
-                break;
-            case '*':
-                currentstate = INCOMMENT; // INCOMMENT是/*评论的情况
-                currentpos++;
-                break;
-            default:
-                currentstate = DONE;
-                addToken(tk, Token(DIVIDE, "DIVIDE"), line);
-                break;
-            }
-        }
-        if (currentstate == COMMENTING && is_EOF)
-        {
-            switch (c)
-            {
-            case '\n':
-                currentstate = DONE;
-                line++;
-                addToken(tk, Token(COMMENT, info), line);
-                info = "";
-                currentpos++;
-                break;
-            default:
-                info += c;
-                currentpos++;
-                break;
-            }
-        }
-        if (currentstate == INCOMMENT && is_EOF)
-        {
-            switch (c)
-            {
-            case '*':
-                currentstate = WAIT_OVER;
-                currentpos++;
-                break;
-            default:
-                info += c;
-                currentpos++;
-                break;
-            }
-        }
-        if (currentstate == WAIT_OVER && is_EOF)
-        {
-            switch (c)
-            {
-            case '*':
-                currentpos++;
-                info += "*";
-                break;
-            case '/':
-                currentstate = DONE;
-                currentpos++;
-                addToken(tk, Token(COMMENT, info), line);
-                info = "";
-            default:
-                currentstate = INCOMMENT;
-                info += "*";
-                info += c;
-                currentpos++;
-                break;
-            }
-        }
-        return;
     }
+    return;
 }
 
-void initdfa()
+void TransitionNotDone(char c, Token_List *tk, bool is_EOF)
 {
-    // initialize the dfa
     currentstate = (STATE)START;
-    currentpos = 0;
+    Transition(c, tk, is_EOF);
+}
+void initdfa() // initialize the dfa
+{
+    currentstate = (STATE)START;
+    line = 1;
+    info = "";
 }

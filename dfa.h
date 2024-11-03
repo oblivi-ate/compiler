@@ -21,8 +21,12 @@ enum STATE
     UNGET      // unget the last character
 };
 
-void initdfa();
+extern STATE currentstate;
+extern int line;
+extern std::string info;
 
+void initdfa();
 void Transition(char c, Token_List *tk, bool is_EOF);
+void TransitionNotDone(char c, Token_List *tk, bool is_EOF);
 
 #endif
