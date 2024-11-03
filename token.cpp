@@ -46,12 +46,16 @@ std::unordered_map<TokenType, std::string> token_table = {
     // ...
 };
 
-void addToken(Token_List *token_list, Token token, int line)
+void addToken(Token_List *token_list, Token token, int line) 
 {
+    Token_List *current = token_list;
+    while (current->next != nullptr)
+    {
+        current = current->next;
+    }
     Token_List *new_token = new Token_List(token, line);
-    token_list->next = new_token;
-    new_token->prev = token_list;
-    token_list = new_token;
+    current->next = new_token;
+    new_token->prev = current;
 }
 
 void printToken(Token_List *token_list)
@@ -68,6 +72,10 @@ void testToken()
 {
     Token_List *token_list = new Token_List(Token(ERR, "error"), -1);
     addToken(token_list, Token(IF, "if"), 1);
+    addToken(token_list, Token(ELSE, "else"), 2);
+    addToken(token_list, Token(WHILE, "while"), 3);
+    addToken(token_list, Token(RETURN, "return"), 4);
+    addToken(token_list, Token(INT, "int"), 5);
     printToken(token_list);
     printf("Test passed.\n");
 }

@@ -12,9 +12,10 @@ void Scanner::scan(Token_List *token_list)
     while (true)
     {
         Transition(currentChar, token_list, in.eof());
-        if (currentstate == (STATE)ERROR)
+        if (currentstate == ERROR)
         {
             std::cerr << "Error occurred during scanning." << std::endl;
+            std::cerr << std::endl;
             return;
         }
         if (!in.eof())

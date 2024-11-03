@@ -8,52 +8,16 @@ STATE currentstate;
 int line;
 std::string info;
 
-std::unordered_map<Token, std::string> keywords = {
-    {Token(IF, "if"), "if"},
-    {Token(ELSE, "else"), "else"},
-    {Token(WHILE, "while"), "while"},
-    {Token(RETURN, "return"), "return"},
-    {Token(INT, "int"), "int"},
-    {Token(VOID, "void"), "void"},
-    {Token(PLUS, "+"), "+"},
-    {Token(MINUS, "-"), "-"},
-    {Token(TIMES, "*"), "*"},
-    {Token(DIVIDE, "/"), "/"},
-    {Token(LT, "<"), "<"},
-    {Token(LTE, "<="), "<="},
-    {Token(GT, ">"), ">"},
-    {Token(GTE, ">="), ">="},
-    {Token(EQ, "=="), "=="},
-    {Token(NEQ, "!="), "!="},
-    {Token(ASSIGN, "="), "="},
-    {Token(SEMICOLON, ";"), ";"},
-    {Token(COMMA, ","), ","},
-    {Token(LPAREN, "("), "("},
-    {Token(RPAREN, ")"), ")"},
-    {Token(LBRACKET, "["), "["},
-    {Token(RBRACKET, "]"), "]"},
-    {Token(LBRACE, "{"), "{"},
-    {Token(RBRACE, "}"), "}"},
-    {Token(ID, "id"), "id"},
-    {Token(NUMBER, "number"), "number"},
-    {Token(LETTER, "letter"), "letter"},
-    {Token(WS, "ws"), "ws"},
-    {Token(INDENT, "indent"), "indent"},
-    {Token(MOD, "MOD"), "mod"},
-    {Token(ENTER, "enter"), "enter"},
-    {Token(ENDFILE, "endfile"), "endfile"},
-    // ...
-};
-
 void Transition(char c, Token_List *tk, bool is_EOF)
 {
-    printf("currentstate: %d\n", currentstate);
+    
     if (is_EOF) // read the end of file
     {
+        printf("currentchar: %c\n", c);
         if(currentstate == INCOMMENT || currentstate == WAIT_OVER || currentstate == COMMENTING)
         {
-            currentstate = (STATE)ERROR;
-            addToken(tk, Token((TokenType)ERROR, "ERROR! Comment is not closed!"), line);
+            currentstate = ERROR;
+            addToken(tk, Token(ERR, "ERROR! Comment is not closed!"), line);
             return;
         }
         currentstate = DONE;
@@ -72,51 +36,51 @@ void Transition(char c, Token_List *tk, bool is_EOF)
         {
         case '+':
             currentstate = DONE;
-            addToken(tk, Token(PLUS, "PLUS"), line);
+            addToken(tk, Token(PLUS, "+"), line);
             return;
         case '-':
             currentstate = DONE;
-            addToken(tk, Token(MINUS, "MINUS"), line);
+            addToken(tk, Token(MINUS, "-"), line);
             return;
         case '*':
             currentstate = DONE;
-            addToken(tk, Token(TIMES, "TIMES"), line);
+            addToken(tk, Token(TIMES, "*"), line);
             return;
         case '%':
             currentstate = DONE;
-            addToken(tk, Token(MOD, "MOD"), line);
+            addToken(tk, Token(MOD, "%"), line);
             return;
         case ';':
             currentstate = DONE;
-            addToken(tk, Token(SEMICOLON, "SEMICOLON"), line);
+            addToken(tk, Token(SEMICOLON, ";"), line);
             return;
         case ',':
             currentstate = DONE;
-            addToken(tk, Token(COMMA, "COMMA"), line);
+            addToken(tk, Token(COMMA, ","), line);
             return;
         case '(':
             currentstate = DONE;
-            addToken(tk, Token(LPAREN, "LPAREN"), line);
+            addToken(tk, Token(LPAREN, "("), line);
             return;
         case ')':
             currentstate = DONE;
-            addToken(tk, Token(RPAREN, "RPAREN"), line);
+            addToken(tk, Token(RPAREN, ")"), line);
             return;
         case '[':
             currentstate = DONE;
-            addToken(tk, Token(LBRACKET, "LBRACKET"), line);
+            addToken(tk, Token(LBRACKET, "["), line);
             return;
         case ']':
             currentstate = DONE;
-            addToken(tk, Token(RBRACKET, "RBRACKET"), line);
+            addToken(tk, Token(RBRACKET, "]"), line);
             return;
         case '{':
             currentstate = DONE;
-            addToken(tk, Token(LBRACE, "LBRACE"), line);
+            addToken(tk, Token(LBRACE, "{"), line);
             return;
         case '}':
             currentstate = DONE;
-            addToken(tk, Token(RBRACE, "RBRACE"), line);
+            addToken(tk, Token(RBRACE, "}"), line);
             return;
         case '\n':
             currentstate = DONE;
@@ -155,55 +119,55 @@ void Transition(char c, Token_List *tk, bool is_EOF)
         case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z':
             currentstate = IN_LET;
             info += c;
+            printf("info: %s\n", info.c_str());
             return;
         default: // 当输入其他字符时直接报错return，在main函数循环中请加入一个判断token类型是否为error的语句，如果是则退出循环
-            currentstate = (STATE)ERROR;
-
-            addToken(tk, Token((TokenType)ERROR, "ERROR! Illegal character!"), line);
+            currentstate = ERROR;
+            addToken(tk, Token(ERR, "ERROR! Illegal character!"), line);
             return;
         }
     }
-    if (currentstate == READ_EQ && is_EOF) // 当已经输入一个‘=’时
+    if (currentstate == READ_EQ) // 当已经输入一个‘=’时
     {
         switch (c)
         {
         case '=': // 第二个 ‘=’ 传入， 状态为DONE，在tokenlist中加入以EQ为Tokentype的新节点
             currentstate = DONE;
-            addToken(tk, Token(EQ, ""), line);
+            addToken(tk, Token(EQ, "=="), line);
             return;
         default: // 没有接收到第二个‘=’状态为NOT_DONE
             currentstate = NOT_DONE;
-            addToken(tk, Token(ASSIGN, "ASSIGN"), line); // 将之前录入的单个引号打入链表
+            addToken(tk, Token(ASSIGN, "="), line); // 将之前录入的单个引号打入链表
             TransitionNotDone(c, tk, is_EOF);
             return;
         }
     }
-    if (currentstate == READ_GT && is_EOF)
+    if (currentstate == READ_GT)
     {
         switch (c)
         {
         case '=':
             currentstate = DONE;
-            addToken(tk, Token(GTE, "GREATER THAN OR EQUAL TO"), line);
+            addToken(tk, Token(GTE, ">="), line);
             return;
         default:
             currentstate = NOT_DONE;
-            addToken(tk, Token(GT, "GREATER"), line);
+            addToken(tk, Token(GT, ">"), line);
             TransitionNotDone(c, tk, is_EOF);
             return;
         }
     }
-    else if (currentstate == READ_LT && is_EOF)
+    else if (currentstate == READ_LT)
     {
         switch (c)
         {
         case '=':
             currentstate = DONE;
-            addToken(tk, Token(LTE, "LESS THAN OR EQUAL TO"), line);
+            addToken(tk, Token(LTE, "<="), line);
             return;
         default:
             currentstate = NOT_DONE;
-            addToken(tk, Token(LT, "LESS THAN"), line);
+            addToken(tk, Token(LT, "<"), line);
             TransitionNotDone(c, tk, is_EOF);
             return;
         }
@@ -214,11 +178,11 @@ void Transition(char c, Token_List *tk, bool is_EOF)
         {
         case '=':
             currentstate = DONE;
-            addToken(tk, Token(NEQ, "NOT EQULA TO"), line);
+            addToken(tk, Token(NEQ, "!="), line);
             return;
         default: // 若读取感叹号！之后没有等号则直接报错，函数直接返回 。
-            currentstate = (STATE)ERROR;
-            addToken(tk, Token((TokenType)ERROR, "ERROR! There are only single ! appeared."), line);
+            currentstate = ERROR;
+            addToken(tk, Token(ERR, "ERROR! There are only single ! appeared."), line);
             return;
         }
     }
@@ -250,27 +214,27 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             currentstate = NOT_DONE;
             if (info == "if")
             {
-                addToken(tk, Token(IF, "IF"), line);
+                addToken(tk, Token(IF, "if"), line);
             }
             else if (info == "else")
             {
-                addToken(tk, Token(ELSE, "ELSE"), line);
+                addToken(tk, Token(ELSE, "else"), line);
             }
             else if (info == "while")
             {
-                addToken(tk, Token(WHILE, "WHILE"), line);
+                addToken(tk, Token(WHILE, "while"), line);
             }
             else if (info == "return")
             {
-                addToken(tk, Token(RETURN, "RETURN"), line);
+                addToken(tk, Token(RETURN, "return"), line);
             }
             else if (info == "int")
             {
-                addToken(tk, Token(INT, "INT"), line);
+                addToken(tk, Token(INT, "int"), line);
             }
             else if (info == "void")
             {
-                addToken(tk, Token(VOID, "VOID"), line);
+                addToken(tk, Token(VOID, "void"), line);
             }
             else
             {
@@ -315,7 +279,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    if (currentstate == INCOMMENT)
+    else if (currentstate == INCOMMENT)
     {
         switch (c)
         {
@@ -328,7 +292,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    if (currentstate == WAIT_OVER)
+    else if (currentstate == WAIT_OVER)
     {
         switch (c)
         {
@@ -340,10 +304,11 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             info += c;
             addToken(tk, Token(COMMENT, info), line);
             info = "";
+            return;
         default:
             currentstate = INCOMMENT;
             info += c;
-            break;
+            return;
         }
     }
     return;
@@ -351,7 +316,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
 
 void TransitionNotDone(char c, Token_List *tk, bool is_EOF)
 {
-    currentstate = (STATE)START;
+    currentstate = START;
     Transition(c, tk, is_EOF);
 }
 void initdfa() // initialize the dfa

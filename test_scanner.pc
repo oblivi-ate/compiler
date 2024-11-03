@@ -1,2 +1,10 @@
-+-*%
-()[]{};,
++-*%()[]{};,
+< > =
+>= <= != == 
+12345
+abcde
+while if else void int 
+// this is a comment
+# this is a comment
+/* this is a comment */
+
