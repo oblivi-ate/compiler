@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <utility>
 #include <string>
+#include <iostream>
 
 STATE currentstate;
 int line;
@@ -13,7 +14,6 @@ void Transition(char c, Token_List *tk, bool is_EOF)
     
     if (is_EOF) // read the end of file
     {
-        printf("currentchar: %c\n", c);
         if(currentstate == INCOMMENT || currentstate == WAIT_OVER || currentstate == COMMENTING)
         {
             currentstate = ERROR;
@@ -21,7 +21,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
         currentstate = DONE;
-        addToken(tk, Token(ENDFILE, ""), line);
+        addToken(tk, Token(ENDFILE, "The end of file"), line);
         return;
     }
     if (currentstate == DONE) // DONE->START
@@ -30,7 +30,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
         Transition(c, tk, is_EOF);
         return;
     }
-    if (currentstate == (STATE)START) // initial state
+    else if (currentstate == START) // initial state
     {
         switch (c)
         {
@@ -84,12 +84,12 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         case '\n':
             currentstate = DONE;
-            addToken(tk, Token(ENTER, "ENTER"), line);
+            addToken(tk, Token(ENTER, "line break"), line);
             line++;
             return;
         case ' ':
             currentstate = DONE;
-            addToken(tk, Token(WS, "WS"), line);
+            addToken(tk, Token(WS, "white space"), line);
             return;
         case '=':
             currentstate = READ_EQ;
@@ -111,15 +111,21 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             currentstate = COMMENTING;
             info += c;
             return;
-            //
-        case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':
+        case ':':
+            currentstate = DONE;
+            addToken(tk, Token(COLON, ":"), line);
+            return;
+        case '0' ... '9':
             currentstate = IN_NUM;
             info += c;
-            break;
-        case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z':
-            currentstate = IN_LET;
+            return;
+        case 'A' ... 'Z':
+            currentstate = IN_ID;
             info += c;
-            printf("info: %s\n", info.c_str());
+            return;
+        case 'a' ... 'z':
+            currentstate = IN_ID;
+            info += c;
             return;
         default: // 当输入其他字符时直接报错return，在main函数循环中请加入一个判断token类型是否为error的语句，如果是则退出循环
             currentstate = ERROR;
@@ -127,7 +133,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    if (currentstate == READ_EQ) // 当已经输入一个‘=’时
+    else if (currentstate == READ_EQ) // 当已经输入一个‘=’时
     {
         switch (c)
         {
@@ -142,7 +148,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    if (currentstate == READ_GT)
+    else if (currentstate == READ_GT)
     {
         switch (c)
         {
@@ -190,7 +196,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
     {
         switch (c)
         {
-        case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':
+        case '0' ... '9':
             currentstate = IN_NUM;
             info += c;
             return;
@@ -202,12 +208,20 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    else if (currentstate == IN_LET) // 前一个是字母的情况
+    else if (currentstate == IN_ID) // 前一个是字母的情况
     { 
         switch (c)
         {
-        case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z':
-            currentstate = IN_LET;
+        case '0' ... '9':
+            currentstate = IN_ID;
+            info += c;
+            return;
+        case 'A' ... 'Z':
+            currentstate = IN_ID;
+            info += c;
+            return;
+        case 'a' ... 'z':
+            currentstate = IN_ID;
             info += c;
             return;
         default:
@@ -238,9 +252,10 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             }
             else
             {
-                addToken(tk, Token(LETTER, info), line);
+                addToken(tk, Token(ID, info), line);
             }
             info = "";
+            TransitionNotDone(c, tk, is_EOF);
             return;
         }
     }
@@ -258,7 +273,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         default:
             currentstate = NOT_DONE;
-            addToken(tk, Token(DIVIDE, "DIVIDE"), line);
+            addToken(tk, Token(DIVIDE, "/"), line);
             info = "";
             TransitionNotDone(c, tk, is_EOF);
             return;

@@ -9,11 +9,11 @@ enum TokenType
     // special symbols
     PLUS, MINUS, TIMES, DIVIDE, MOD, // + - * / % 
     LT, LTE, GT, GTE, EQ, NEQ, ASSIGN, // < <= > >= == != =
-    SEMICOLON, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE, // ; , ( ) [ ] { }
+    SEMICOLON, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE, COLON, // ; , ( ) [ ] { } :
     // COMMENT
     COMMENT, 
     // numbers and strings
-    DIGIT, LETTER, NUMBER,
+    NUMBER,
     // white space
     WS,
     // identifier
