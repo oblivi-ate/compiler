@@ -127,23 +127,23 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             currentstate = IN_ID;
             info += c;
             return;
-        default: // µ±ÊäÈëÆäËû×Ö·ûÊ±Ö±½Ó±¨´íreturn£¬ÔÚmainº¯ÊýÑ­»·ÖÐÇë¼ÓÈëÒ»¸öÅÐ¶ÏtokenÀàÐÍÊÇ·ñÎªerrorµÄÓï¾ä£¬Èç¹ûÊÇÔòÍË³öÑ­»·
+        default: // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½Ê±Ö±ï¿½Ó±ï¿½ï¿½ï¿½returnï¿½ï¿½ï¿½ï¿½mainï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ð¶ï¿½tokenï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½Îªerrorï¿½ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½Ñ­ï¿½ï¿½
             currentstate = ERROR;
             addToken(tk, Token(ERR, "ERROR! Illegal character!"), line);
             return;
         }
     }
-    else if (currentstate == READ_EQ) // µ±ÒÑ¾­ÊäÈëÒ»¸ö¡®=¡¯Ê±
+    else if (currentstate == READ_EQ) // ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½=ï¿½ï¿½Ê±
     {
         switch (c)
         {
-        case '=': // µÚ¶þ¸ö ¡®=¡¯ ´«Èë£¬ ×´Ì¬ÎªDONE£¬ÔÚtokenlistÖÐ¼ÓÈëÒÔEQÎªTokentypeµÄÐÂ½Úµã
+        case '=': // ï¿½Ú¶ï¿½ï¿½ï¿½ ï¿½ï¿½=ï¿½ï¿½ ï¿½ï¿½ï¿½ë£¬ ×´Ì¬ÎªDONEï¿½ï¿½ï¿½ï¿½tokenlistï¿½Ð¼ï¿½ï¿½ï¿½ï¿½ï¿½EQÎªTokentypeï¿½ï¿½ï¿½Â½Úµï¿½
             currentstate = DONE;
             addToken(tk, Token(EQ, "=="), line);
             return;
-        default: // Ã»ÓÐ½ÓÊÕµ½µÚ¶þ¸ö¡®=¡¯×´Ì¬ÎªNOT_DONE
+        default: // Ã»ï¿½Ð½ï¿½ï¿½Õµï¿½ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½=ï¿½ï¿½×´Ì¬ÎªNOT_DONE
             currentstate = NOT_DONE;
-            addToken(tk, Token(ASSIGN, "="), line); // ½«Ö®Ç°Â¼ÈëµÄµ¥¸öÒýºÅ´òÈëÁ´±í
+            addToken(tk, Token(ASSIGN, "="), line); // ï¿½ï¿½Ö®Ç°Â¼ï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             TransitionNotDone(c, tk, is_EOF);
             return;
         }
@@ -186,13 +186,13 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             currentstate = DONE;
             addToken(tk, Token(NEQ, "!="), line);
             return;
-        default: // Èô¶ÁÈ¡¸ÐÌ¾ºÅ£¡Ö®ºóÃ»ÓÐµÈºÅÔòÖ±½Ó±¨´í£¬º¯ÊýÖ±½Ó·µ»Ø ¡£
+        default: // ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ì¾ï¿½Å£ï¿½Ö®ï¿½ï¿½Ã»ï¿½ÐµÈºï¿½ï¿½ï¿½Ö±ï¿½Ó±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ó·ï¿½ï¿½ï¿½ ï¿½ï¿½
             currentstate = ERROR;
             addToken(tk, Token(ERR, "ERROR! There are only single ! appeared."), line);
             return;
         }
     }
-    else if (currentstate == IN_NUM) // Ç°Ò»¸öÊÇÊý×ÖµÄÇé¿ö
+    else if (currentstate == IN_NUM) // Ç°Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
     {
         switch (c)
         {
@@ -208,7 +208,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    else if (currentstate == IN_ID) // Ç°Ò»¸öÊÇ×ÖÄ¸µÄÇé¿ö
+    else if (currentstate == IN_ID) // Ç°Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½
     { 
         switch (c)
         {
@@ -259,16 +259,16 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    else if (currentstate == READ_OVER) // Ç°Ò»¸öÊÇÐ±¸ÜµÄÇé¿ö
+    else if (currentstate == READ_OVER) // Ç°Ò»ï¿½ï¿½ï¿½ï¿½Ð±ï¿½Üµï¿½ï¿½ï¿½ï¿½
     { 
         switch (c)
         {
         case '/':
-            currentstate = COMMENTING; // COMMENTINGÊÇ#ÆÀÂÛºÍ//ÆÀÂÛµÄÇé¿ö
+            currentstate = COMMENTING; // COMMENTINGï¿½ï¿½#ï¿½ï¿½ï¿½Ûºï¿½//ï¿½ï¿½ï¿½Ûµï¿½ï¿½ï¿½ï¿½
             info += c;
             return;
         case '*':
-            currentstate = INCOMMENT; // INCOMMENTÊÇ/*ÆÀÂÛµÄÇé¿ö
+            currentstate = INCOMMENT; // INCOMMENTï¿½ï¿½/*ï¿½ï¿½ï¿½Ûµï¿½ï¿½ï¿½ï¿½
             info += c;
             return;
         default:
