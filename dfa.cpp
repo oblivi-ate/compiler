@@ -127,23 +127,23 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             currentstate = IN_ID;
             info += c;
             return;
-        default: // �����������ַ�ʱֱ�ӱ���return����main����ѭ���������һ���ж�token�����Ƿ�Ϊerror����䣬��������˳�ѭ��
+        default: 
             currentstate = ERROR;
             addToken(tk, Token(ERR, "ERROR! Illegal character!"), line);
             return;
         }
     }
-    else if (currentstate == READ_EQ) // ���Ѿ�����һ����=��ʱ
+    else if (currentstate == READ_EQ) 
     {
         switch (c)
         {
-        case '=': // �ڶ��� ��=�� ���룬 ״̬ΪDONE����tokenlist�м�����EQΪTokentype���½ڵ�
+        case '=': 
             currentstate = DONE;
             addToken(tk, Token(EQ, "=="), line);
             return;
-        default: // û�н��յ��ڶ�����=��״̬ΪNOT_DONE
+        default: 
             currentstate = NOT_DONE;
-            addToken(tk, Token(ASSIGN, "="), line); // ��֮ǰ¼��ĵ������Ŵ�������
+            addToken(tk, Token(ASSIGN, "="), line); 
             TransitionNotDone(c, tk, is_EOF);
             return;
         }
@@ -186,13 +186,13 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             currentstate = DONE;
             addToken(tk, Token(NEQ, "!="), line);
             return;
-        default: // ����ȡ��̾�ţ�֮��û�еȺ���ֱ�ӱ���������ֱ�ӷ��� ��
+        default: 
             currentstate = ERROR;
             addToken(tk, Token(ERR, "ERROR! There are only single ! appeared."), line);
             return;
         }
     }
-    else if (currentstate == IN_NUM) // ǰһ�������ֵ����
+    else if (currentstate == IN_NUM) 
     {
         switch (c)
         {
@@ -208,7 +208,7 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    else if (currentstate == IN_ID) // ǰһ������ĸ�����
+    else if (currentstate == IN_ID) 
     { 
         switch (c)
         {
@@ -259,16 +259,16 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             return;
         }
     }
-    else if (currentstate == READ_OVER) // ǰһ����б�ܵ����
+    else if (currentstate == READ_OVER) 
     { 
         switch (c)
         {
         case '/':
-            currentstate = COMMENTING; // COMMENTING��#���ۺ�//���۵����
+            currentstate = COMMENTING; 
             info += c;
             return;
         case '*':
-            currentstate = INCOMMENT; // INCOMMENT��/*���۵����
+            currentstate = INCOMMENT; 
             info += c;
             return;
         default:
