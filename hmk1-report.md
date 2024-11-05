@@ -1,7 +1,7 @@
 # compiler
 
 ## Group member
-YU QIANSHUO : 
+YU QIANSHUO : 1210027225
 WANG KUN : 1210025783
 ZHENG AO : 1220005554 
 
