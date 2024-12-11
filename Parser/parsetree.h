@@ -8,7 +8,7 @@ enum NodeKind
 
 enum StmtKind
 {
-    IF, ELSE, ELIF, WHILE, RETURN
+    IF, ELSE, ELIF, WHILE, RETURN, EXPR
 };
 
 enum ExprKind
