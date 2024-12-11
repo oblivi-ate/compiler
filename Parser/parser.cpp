@@ -24,6 +24,78 @@ Token_List *prev_pos()
     return pos;
 }
 
+TreeNode* program()
+{
+    TreeNode *root = new TreeNode();
+    root->nodekind = NodeKind::LIST;
+    root->kind.list = ListKind::STMT;
+    root->line = pos->line;
+
+    root->child[0] = declaration_list();
+
+    return root;
+}
+
+TreeNode* declaration_list()
+{
+    TreeNode *root = new TreeNode();
+    root->nodekind = NodeKind::LIST;
+    root->kind.list = ListKind::STMT;
+    root->line = pos->line;
+
+    while (pos->token.type != TokenType::ENDFILE)
+    {
+        root->child[0] = declaration();
+        root->child[1] = declaration_list();
+    }
+
+    return root;
+}
+
+TreeNode* declaration(){
+
+}
+
+TreeNode* var_declaration(){
+
+}
+
+TreeNode* type_specifier(){
+
+}
+
+TreeNode* fun_declaration(){
+
+}
+
+TreeNode* params(){
+
+}
+
+TreeNode* param_list(){
+
+}
+
+TreeNode* param(){
+
+}
+
+TreeNode* compound_stmt(){
+
+}
+
+TreeNode* local_declarations(){
+
+}
+
+TreeNode* statement_list(){
+
+}
+
+TreeNode* stmt(){
+
+}
+
 TreeNode* if_stmt()
 {
     TreeNode* root = new TreeNode();
@@ -60,7 +132,7 @@ TreeNode* if_clause()
     }
 
     next_pos();
-    root->child[1] = stmt_list();
+    root->child[1] = stmt();
 
     return root;
 }
@@ -82,7 +154,7 @@ TreeNode* elif_clause()
     }
 
     next_pos();
-    root->child[0] = if_stmt(); // else if -> else if_stmt
+    root->child[0] = if_stmt(); // else if --> else if_stmt
 
     return root;
 }
@@ -113,19 +185,105 @@ TreeNode* else_clause()
     }
 
     next_pos();
-    root->child[0] = stmt_list();
+    root->child[0] = statement_list();
 
     return root;
 }
 
 TreeNode* expression()
 {
-    
+    TreeNode* root = new TreeNode();
+
+    root->nodekind = NodeKind::EXPR;
+    root->kind.expr = ExprKind::OP;
+    root->line = pos->line;
+
+    if(pos->token.type == TokenType::ID)
+    {
+        root->child[0] = var();
+        if(pos->token.type != TokenType::ASSIGN)
+        {
+            throw "Syntax Error: Expecting '=' at line " + std::to_string(pos->line);
+        }
+        next_pos();
+        root->child[1] = expression();
+    }
+    else
+    {
+        root->child[0] = simple_expr();
+    }
+
+    return root;
 }
 
-TreeNode* stmt_list()
-{   
+TreeNode* var(){
     TreeNode* root = new TreeNode();
+
+    if(pos->token.type != TokenType::ID)
+    {
+        throw "Syntax Error: Expecting identifier at line " + std::to_string(pos->line);
+    }
+
+    root->nodekind = NodeKind::EXPR;
+    root->kind.expr = ExprKind::ID;
+    root->line = pos->line;
+
+    next_pos();
+    if(pos->token.type == TokenType::LBRACKET)
+    {
+        next_pos();
+        root->child[0] = expression();
+        if(pos->token.type != TokenType::RBRACKET)
+        {
+            throw "Syntax Error: Expecting ']' at line " + std::to_string(pos->line);
+        }
+        next_pos();
+    }
+
+    return root;
+}
+
+TreeNode* simple_expr()
+{
+    TreeNode* root = new TreeNode();
+
+}
+
+TreeNode* additive_expr()
+{
+    TreeNode* root = new TreeNode();
+
+}
+
+TreeNode* relop(){
+
+}
+
+TreeNode* addop(){
+
+}
+
+TreeNode* term(){
+
+}
+
+TreeNode* mulop(){
+
+}
+
+TreeNode* factor(){
+
+}
+
+TreeNode* call(){
+
+}
+
+TreeNode* arg(){
+
+}
+
+TreeNode* arg_list(){
 
 }
 
