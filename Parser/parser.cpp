@@ -127,6 +127,7 @@ TreeNode *declaration(bool &status) // declaration → var-declaration | fun-dec
     }
     else if (result->child[0] = fun_declaration(s), s == true)
     {
+        std::cout << "fun_declaration" << std::endl;
         status = true;
         return result;
     }
@@ -135,7 +136,7 @@ TreeNode *declaration(bool &status) // declaration → var-declaration | fun-dec
     return nullptr;
 }
 
-TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier ID | type-specifier ID [ NUM ]
+TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier ID ; | type-specifier ID [ NUM ] ;
 {
     bool s = false;
     TreeNode *result = new TreeNode();
@@ -146,12 +147,18 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
     {
         if (check(TokenType::ID))
         {
+            result->kind.dcl = DclKind::VAR_DCL;
+            prev_pos();
             result->attr.dclAttr.name = pos->token.info.c_str();
+            next_pos();
             if (check(TokenType::LBRACKET))
             {
+                result->kind.dcl = DclKind::ARRAY_DCL;
                 if (check(TokenType::NUMBER))
                 {
+                    prev_pos();
                     result->attr.dclAttr.size = integer();
+                    next_pos();
                     if (check(TokenType::RBRACKET))
                     {
                         if (check(TokenType::SEMICOLON))
@@ -171,13 +178,28 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
                 }
                 else
                 {
-                    expect("Syntax Error: Expecting 'NUM'");
+                    expect("Syntax Error: Expecting 'NUMBER'");
                 }
+            }
+            else if (check(TokenType::LPAREN))
+            {
+                prev_pos(); // back to LPAREN
+                prev_pos(); // back to ID
+                prev_pos(); // back to type-specifier
+                status = false;
+                return nullptr;
             }
             else
             {
-                status = true;
-                return result;
+                if (check(TokenType::SEMICOLON))
+                {
+                    status = true;
+                    return result;
+                }
+                else
+                {
+                    expect("Syntax Error: Expecting ';'");
+                }
             }
         }
         else
@@ -187,6 +209,7 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
     }
 
     status = false;
+    result->nodekind = NodeKind::NULL_ND;
     return nullptr;
 }
 
@@ -225,7 +248,12 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
     {
         if (check(TokenType::ID))
         {
+
+            result->kind.dcl = DclKind::FUN_DCL;
+            prev_pos();
             result->attr.dclAttr.name = pos->token.info.c_str();
+            std::cout << pos->token.info << std::endl;
+            next_pos();
             if (check(TokenType::LPAREN))
             {
                 if (result->child[1] = params(s), s == true)
@@ -250,17 +278,20 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
                         }
                     }
                 }
-                else
-                {
-                    expect("Syntax Error: Expecting '('");
-                }
+            }
+            else
+            {
+                expect("Syntax Error: Expecting '('");
             }
         }
         else if (check(TokenType::DEF))
         {
             if (check(TokenType::ID))
             {
+                result->kind.dcl = DclKind::FUN_DCL;
+                prev_pos();
                 result->attr.dclAttr.name = pos->token.info.c_str();
+                next_pos();
                 if (check(TokenType::LPAREN))
                 {
                     if (result->child[1] = params(s), s == true)
@@ -293,6 +324,9 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
             }
         }
     }
+    result->nodekind = NodeKind::NULL_ND;
+    status = false;
+    return nullptr;
 }
 TreeNode *params(bool &status) // params → void | param-list
 {
@@ -301,19 +335,14 @@ TreeNode *params(bool &status) // params → void | param-list
     result->nodekind = NodeKind::NULL_ND;
     result->line = pos->line;
 
-    if (check(TokenType::VOID))
-    {
-        status = true;
-        return result;
-    }
-    else if (result->child[0] = param_list(s), s == true)
+    if (result->child[0] = param_list(s), s == true)
     {
         status = true;
         return result;
     }
 
-    status = false;
-    return nullptr;
+    status = true;
+    return result;
 }
 
 TreeNode *param_list(bool &status) // param-list → param | param , param-list
@@ -380,7 +409,7 @@ TreeNode *param(bool &status) // param → type-specifier ID | type-specifier ID
     return nullptr;
 }
 
-TreeNode *compound_stmt(bool &status)
+TreeNode *compound_stmt(bool &status) // compound-stmt → { local-declarations statement-list }
 {
     bool s = false;
     TreeNode *root = new TreeNode();
@@ -390,18 +419,28 @@ TreeNode *compound_stmt(bool &status)
 
     if (check(TokenType::LBRACE))
     {
-        root->child[0] = local_declarations(s);
-        root->child[1] = statement_list(s);
-        if (check(TokenType::RBRACE))
+        if (root->child[0] = local_declarations(s), s == true)
         {
-            status = true;
-            return root;
-        }
-        else
-        {
-            expect("Syntax Error: Expecting '}'");
+            if (root->child[1] = statement_list(s), s == true)
+            {
+                if (check(TokenType::RBRACE))
+                {
+                    status = true;
+                    return root;
+                }
+                else
+                {
+                    expect("Syntax Error: Expecting '}'");
+                }
+            }
+            else
+            {
+                expect("Syntax Error: Expecting statement_list");
+            }
         }
     }
+
+    expect("Syntax Error: Expecting '{'");
 }
 
 TreeNode *local_declarations(bool &status) // local-declarations → var-declarations local-declaration | empty
@@ -420,7 +459,7 @@ TreeNode *local_declarations(bool &status) // local-declarations → var-declara
         }
     }
 
-    status = false;
+    status = true;
     return result;
 }
 
@@ -440,7 +479,7 @@ TreeNode *statement_list(bool &status) // statement-list → statement statement
         }
     }
 
-    status = false;
+    status = true;
     return result;
 }
 
@@ -496,7 +535,7 @@ TreeNode *expression_stmt(bool &status) // expression-stmt → expression ; | ;
     return nullptr;
 }
 
-TreeNode *selection_stmt(bool &status) // selection-stmt → if ( expression ) statement | if ( expression ) statement else statement | if ( expression ) : statement | if ( expression ) : statement else : statement
+TreeNode *selection_stmt(bool &status) // selection-stmt → if ( expression ) { stmt_list } | if ( expression ) { stmt_list } else { stmt_list } | if ( expression ) : { stmt_list } | if ( expression ) : { stmt_list } else : { stmt_list }
 {
     bool s = false;
     TreeNode *result = new TreeNode();
@@ -513,22 +552,50 @@ TreeNode *selection_stmt(bool &status) // selection-stmt → if ( expression ) s
                 if (check(TokenType::RPAREN))
                 {
                     check(TokenType::COLON);
-                    if (result->child[1] = stmt(s), s == true)
+                    if (check(TokenType::LBRACE))
                     {
-                        if (check(TokenType::ELSE))
+                        if (result->child[1] = statement_list(s), s == true)
                         {
-                            check(TokenType::COLON);
-                            if (result->child[2] = stmt(s), s == true)
+                            if (check(TokenType::RBRACE))
                             {
-                                status = true;
-                                return result;
+                                if (check(TokenType::ELSE))
+                                {
+                                    check(TokenType::COLON);
+                                    if (check(TokenType::LBRACE))
+                                    {
+                                        if (result->child[2] = statement_list(s), s == true)
+                                        {
+                                            if (check(TokenType::RBRACE))
+                                            {
+                                                status = true;
+                                                return result;
+                                            }
+                                            else
+                                            {
+                                                expect("Syntax Error: Expecting '}'");
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        expect("Syntax Error: Expecting '{'");
+                                    }
+                                }
+                                else
+                                {
+                                    status = true;
+                                    return result;
+                                }
+                            }
+                            else
+                            {
+                                expect("Syntax Error: Expecting '}'");
                             }
                         }
-                        else
-                        {
-                            status = true;
-                            return result;
-                        }
+                    }
+                    else
+                    {
+                        expect("Syntax Error: Expecting '{'");
                     }
                 }
             }
@@ -539,7 +606,7 @@ TreeNode *selection_stmt(bool &status) // selection-stmt → if ( expression ) s
     return nullptr;
 }
 
-TreeNode *iteration_stmt(bool &status) // iteration-stmt → while ( expression ) statement | while ( expression ) : statement
+TreeNode *iteration_stmt(bool &status) // iteration-stmt → while ( expression ) { stmt_list } | while ( expression ) : { stmt_list }
 {
     bool s = false;
     TreeNode *result = new TreeNode();
@@ -555,22 +622,25 @@ TreeNode *iteration_stmt(bool &status) // iteration-stmt → while ( expression 
             {
                 if (check(TokenType::RPAREN))
                 {
-                    if (result->child[1] = stmt(s), s == true)
+                    if (check(TokenType::LBRACE))
                     {
-                        status = true;
-                        return result;
-                    }
-                    else if (check(TokenType::COLON))
-                    {
-                        if (result->child[1] = stmt(s), s == true)
+                        check(TokenType::COLON);
+                        if (result->child[1] = statement_list(s), s == true)
                         {
-                            status = true;
-                            return result;
+                            if (check(TokenType::RBRACE))
+                            {
+                                status = true;
+                                return result;
+                            }
+                            else
+                            {
+                                expect("Syntax Error: Expecting '}'");
+                            }
                         }
                     }
                     else
                     {
-                        expect("Syntax Error: Expecting ':'");
+                        expect("Syntax Error: Expecting '{'");
                     }
                 }
                 else
@@ -647,6 +717,7 @@ TreeNode *expression(bool &status) // expression → var = expression | simple-e
     }
 
     status = false;
+    expect("Syntax Error: Expecting 'var' or 'simple-exprssion'");
     return nullptr;
 }
 
@@ -681,7 +752,6 @@ TreeNode *var(bool &status) // var → ID | ID [ expression ]
     }
 
     status = false;
-    expect("Syntax Error: Expecting 'ID'");
     return nullptr;
 }
 
@@ -729,7 +799,6 @@ TreeNode *relop(bool &status) // relop → <= | < | > | >= | == | !=
     }
 
     status = false;
-    expect("Syntax Error: Expecting '<=', '<', '>', '>=', '==', or '!='");
     return nullptr;
 }
 
@@ -954,6 +1023,25 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
     return nullptr;
 }
 
+void printTree(TreeNode *root, int deep)
+{
+    if (root == nullptr)
+    {
+        return;
+    }
+    std::cout << "Deep: " << deep << std::endl;
+    std::cout << "NodeKind: " << root->nodekind << std::endl;
+    std::cout << "Line: " << root->line << std::endl;
+    if (root->nodekind == NodeKind::DCL && root->kind.dcl == DclKind::VAR_DCL)
+    {
+        std::cout << "Name: " << root->attr.dclAttr.name << std::endl;
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        printTree(root->child[i], deep + 1);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     std::cout << "Parser" << std::endl;
@@ -970,5 +1058,8 @@ int main(int argc, char *argv[])
     {
         std::cout << "Parsing Failed" << std::endl;
     }
+    // print tree
+    printTree(root, 1);
+
     return 0;
 }
