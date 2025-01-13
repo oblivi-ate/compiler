@@ -28,6 +28,8 @@ enum TokenType
     ENDFILE,
     // start of the scanner
     ST,
+    // def keyword
+    DEF,
     // ...
 
 };

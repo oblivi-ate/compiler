@@ -41,7 +41,7 @@ std::unordered_map<TokenType, std::string> token_table = {
     {TokenType::ENTER, "ENTER"},
     {TokenType::ENDFILE, "ENDFILE"},
     {TokenType::ST, "START"},
-
+    {TokenType::DEF, "DEF"}
     // ...
 };
 

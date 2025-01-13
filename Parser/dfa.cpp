@@ -250,6 +250,10 @@ void Transition(char c, Token_List *tk, bool is_EOF)
             {
                 addToken(tk, Token(VOID, "void"), line);
             }
+            else if(info == "def")
+            {
+                addToken(tk, Token(DEF, "def"), line);
+            }
             else
             {
                 addToken(tk, Token(ID, info), line);
