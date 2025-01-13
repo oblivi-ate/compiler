@@ -13,7 +13,7 @@ WANG KUN, ZHENG AO: parser(.cpp & .h) <br>
 `g++ token.cpp dfa.cpp scanner.cpp parser.cpp parsetree.cpp -o parser -std=c++17`
 
 #### Run
-`./parser while_etc.pc`
+`./parser test.pyc`
 
 
 Reference: <br>

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 
+
 void Scanner::scan(Token_List *token_list)
 {
     initdfa();              
@@ -29,7 +30,7 @@ void Scanner::scan(Token_List *token_list)
     }
 }
 
-int doScan(int argc, char *argv[], Token_List *tk){
+int doScan(int argc, char *argv[], Token_List *&tk){
     if (argc != 2)
     {
         std::cerr << "Usage: " << argv[0] << " <input_file>" << std::endl;
@@ -46,8 +47,25 @@ int doScan(int argc, char *argv[], Token_List *tk){
 
     Scanner scanner(inputFile);
     scanner.scan(token_list);
-
+    
+    // delete white space tokens or ENTER tokens
+    Token_List *temp = token_list;
+    while (temp != nullptr)
+    {
+        if (temp->token.type == TokenType::WS || temp->token.type == TokenType::ENTER)
+        {
+            temp->prev->next = temp->next;
+            temp->next->prev = temp->prev;       
+        }
+        temp = temp->next;
+    }
+    
+    // delete header
+    token_list = token_list->next;
+    token_list->prev = nullptr;
+    
     tk = token_list;
+
 
     inputFile.close();
 

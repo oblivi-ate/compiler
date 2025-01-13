@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "parsetree.h"
 #include "token.h"
-#include "scanner.cpp"
+#include "scanner.h"
 
 #include <iostream>
 #include <iostream>
@@ -10,8 +10,13 @@
 #include <vector>
 #include <stdexcept>
 
+void test(std::string s)
+{
+    std::cout << "Parser: " << s << std::endl;
+}
+
 Token_List *pos; // get result from scanner
-void get_parser_token(int argc, char *argv[], Token_List *pos)
+void get_parser_token(int argc, char *argv[])
 {
     doScan(argc, argv, pos);
     return;
@@ -36,7 +41,6 @@ Token_List *prev_pos()
     pos = pos->prev;
     return pos;
 }
-
 
 bool check(TokenType type)
 {
@@ -94,6 +98,12 @@ TreeNode *declaration_list(bool &status) // declaration-list → declaration | d
     {
         if (result->child[1] = declaration_list(s), s == true)
         {
+
+            status = true;
+            return result;
+        }
+        else
+        {
             status = true;
             return result;
         }
@@ -110,12 +120,12 @@ TreeNode *declaration(bool &status) // declaration → var-declaration | fun-dec
     result->nodekind = NodeKind::NULL_ND;
     result->line = pos->line;
 
-    if(result->child[0] = var_declaration(s), s == true)
+    if (result->child[0] = var_declaration(s), s == true)
     {
         status = true;
         return result;
     }
-    else if(result->child[0] = fun_declaration(s), s == true)
+    else if (result->child[0] = fun_declaration(s), s == true)
     {
         status = true;
         return result;
@@ -144,8 +154,15 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
                     result->attr.dclAttr.size = integer();
                     if (check(TokenType::RBRACKET))
                     {
-                        status = true;
-                        return result;
+                        if (check(TokenType::SEMICOLON))
+                        {
+                            status = true;
+                            return result;
+                        }
+                        else
+                        {
+                            expect("Syntax Error: Expecting ';'");
+                        }
                     }
                     else
                     {
@@ -197,7 +214,7 @@ TreeNode *type_specifier(bool &status) // type-specifier → int | void
     return nullptr;
 }
 
-TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID ( params ) compound-stmt | def ID (params) compound-stmt  
+TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID ( params ) compound-stmt | def ID (params) compound-stmt
 {
     bool s = false;
     TreeNode *result = new TreeNode();
@@ -217,54 +234,67 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
                     {
                         if (result->child[2] = compound_stmt(s), s == true)
                         {
-                            status = true;
-                            return result;
+                            if (check(TokenType::SEMICOLON))
+                            {
+                                status = true;
+                                return result;
+                            }
+                            else
+                            {
+                                expect("Syntax Error: Expecting ';'");
+                            }
+                        }
+                        else
+                        {
+                            expect("Syntax Error: Expecting ')'");
                         }
                     }
-                    else
-                    {
-                        expect("Syntax Error: Expecting ')'");
-                    }
                 }
-            }
-            else
-            {
-                expect("Syntax Error: Expecting '('");
+                else
+                {
+                    expect("Syntax Error: Expecting '('");
+                }
             }
         }
-    }
-    else if(check(TokenType::DEF))
-    {
-        if (check(TokenType::ID))
+        else if (check(TokenType::DEF))
         {
-            result->attr.dclAttr.name = pos->token.info.c_str();
-            if (check(TokenType::LPAREN))
+            if (check(TokenType::ID))
             {
-                if (result->child[1] = params(s), s == true)
+                result->attr.dclAttr.name = pos->token.info.c_str();
+                if (check(TokenType::LPAREN))
                 {
-                    if (check(TokenType::RPAREN))
+                    if (result->child[1] = params(s), s == true)
                     {
-                        if (result->child[2] = compound_stmt(s), s == true)
+                        if (check(TokenType::RPAREN))
                         {
-                            status = true;
-                            return result;
+                            if (result->child[2] = compound_stmt(s), s == true)
+                            {
+                                if (check(TokenType::SEMICOLON))
+                                {
+                                    status = true;
+                                    return result;
+                                }
+                                else
+                                {
+                                    expect("Syntax Error: Expecting ';'");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            expect("Syntax Error: Expecting ')'");
                         }
                     }
-                    else
-                    {
-                        expect("Syntax Error: Expecting ')'");
-                    }
                 }
-            }
-            else
-            {
-                expect("Syntax Error: Expecting '('");
+                else
+                {
+                    expect("Syntax Error: Expecting '('");
+                }
             }
         }
     }
 }
-
-TreeNode *params(bool &status) // params → void | param-list 
+TreeNode *params(bool &status) // params → void | param-list
 {
     bool s = false;
     TreeNode *result = new TreeNode();
@@ -321,14 +351,14 @@ TreeNode *param(bool &status) // param → type-specifier ID | type-specifier ID
     result->nodekind = NodeKind::PARAM;
     result->line = pos->line;
 
-    if(result->child[0] = type_specifier(s), s == true)
+    if (result->child[0] = type_specifier(s), s == true)
     {
-        if(check(TokenType::ID))
+        if (check(TokenType::ID))
         {
             result->attr.dclAttr.name = pos->token.info.c_str();
-            if(check(TokenType::LBRACKET))
+            if (check(TokenType::LBRACKET))
             {
-                if(check(TokenType::RBRACKET))
+                if (check(TokenType::RBRACKET))
                 {
                     status = true;
                     return result;
@@ -375,7 +405,7 @@ TreeNode *compound_stmt(bool &status)
 }
 
 TreeNode *local_declarations(bool &status) // local-declarations → var-declarations local-declaration | empty
-{   
+{
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
@@ -401,9 +431,9 @@ TreeNode *statement_list(bool &status) // statement-list → statement statement
     result->nodekind = NodeKind::NULL_ND;
     result->line = pos->line;
 
-    if(result->child[0] = stmt(s), s == true)
+    if (result->child[0] = stmt(s), s == true)
     {
-        if(result->child[1] = statement_list(s), s == true)
+        if (result->child[1] = statement_list(s), s == true)
         {
             status = true;
             return result;
@@ -828,6 +858,7 @@ TreeNode *factor(bool &status) // factor → ( expression ) | NUM | var | call
         result->kind.expr = ExprKind::CONST_EXPR;
         result->attr.exprAttr.val = integer();
         status = true;
+
         return result;
     }
     else if (pos->token.type == TokenType::ID)
@@ -923,16 +954,21 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
     return nullptr;
 }
 
-
 int main(int argc, char *argv[])
 {
-    get_parser_token(argc, argv, pos);
+    std::cout << "Parser" << std::endl;
+    get_parser_token(argc, argv);
+    printToken(pos);
     bool status = false;
     TreeNode *root = program(status);
     if (status == true)
     {
         std::cout << "Parsing Successful" << std::endl;
-        //printTree(root);
+        // printTree(root);
+    }
+    else
+    {
+        std::cout << "Parsing Failed" << std::endl;
     }
     return 0;
 }

@@ -16,4 +16,6 @@ private:
     char currentChar; 
 };
 
+int doScan(int argc, char *argv[], Token_List *&tk);
+
 #endif

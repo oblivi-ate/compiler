@@ -1,7 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "parser.h"
 #include "parsetree.h"
 
 // declare the function in parser.cpp
@@ -36,4 +35,4 @@ TreeNode *args(bool &status);
 TreeNode *arg_list(bool &status);
 
 
-#endif  PARSER_H
+#endif PARSER_H
