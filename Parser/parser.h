@@ -33,6 +33,20 @@ TreeNode *factor(bool &status);
 TreeNode *call(bool &status);
 TreeNode *args(bool &status);
 TreeNode *arg_list(bool &status);
-
-
-#endif PARSER_H
+const char* token_type_to_string(TokenType type) {
+    switch (type) {
+    case TokenType::PLUS: return "+";
+    case TokenType::MINUS: return "-";
+    case TokenType::TIMES: return "*";
+    case TokenType::DIVIDE: return "/";
+    case TokenType::ASSIGN: return "=";
+    case TokenType::LTE: return "<=";
+    case TokenType::LT: return "<";
+    case TokenType::GT: return ">";
+    case TokenType::GTE: return ">=";
+    case TokenType::EQ: return "==";
+    case TokenType::NEQ: return "!=";
+    default: return "Unknown Token";
+    }
+}
+#endif //PARSER_H

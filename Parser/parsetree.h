@@ -1,5 +1,5 @@
-#ifndef PARSETREE_H
-#define PARSETREE_H
+#ifndef PARSERTREE_H
+#define PARSERTREE_H
 
 #include "token.h"
 #define MAX_CHILDREN 4
@@ -71,4 +71,4 @@ struct TreeNode
 
 
 
-#endif PARSETREE_H
+#endif //PARSERTREE_H
