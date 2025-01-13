@@ -1,6 +1,7 @@
 #ifndef PARSETREE_H
 #define PARSETREE_H
 
+#include "token.h"
 #define MAX_CHILDREN 4
 
 enum NodeKind
@@ -29,7 +30,7 @@ enum DclKind{
 
 enum ExprType
 {
-    VOID, INT
+    Void, Int
 };  
 
 struct TreeNode

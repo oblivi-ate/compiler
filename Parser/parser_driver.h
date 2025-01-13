@@ -3,5 +3,6 @@
 
 #include "parser.h"
 #include "scanner.h"
+#include "parsetree.h"
 
 #endif PARSER_DRIVER_H

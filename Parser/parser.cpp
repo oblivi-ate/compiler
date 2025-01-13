@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 Token_List *pos; // get result from scanner
-void get_token(int argc, char *argv[], Token_List *pos)
+void get_parser_token(int argc, char *argv[], Token_List *pos)
 {
     doScan(argc, argv, pos);
     return;
@@ -47,6 +47,7 @@ bool check(TokenType type)
     }
     return false;
 }
+
 void expect(const std::string &msg)
 {
     throw std::runtime_error(msg + " at line " + std::to_string(pos->line));
@@ -181,13 +182,13 @@ TreeNode *type_specifier(bool &status) // type-specifier → int | void
 
     if (check(TokenType::INT))
     {
-        result->attr.dclAttr.type = ExprType::INT;
+        result->attr.dclAttr.type = ExprType::Int;
         status = true;
         return result;
     }
     else if (check(TokenType::VOID))
     {
-        result->attr.dclAttr.type = ExprType::VOID;
+        result->attr.dclAttr.type = ExprType::Void;
         status = true;
         return result;
     }
@@ -920,4 +921,18 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
 
     status = false;
     return nullptr;
+}
+
+
+int main(int argc, char *argv[])
+{
+    get_parser_token(argc, argv, pos);
+    bool status = false;
+    TreeNode *root = program(status);
+    if (status == true)
+    {
+        std::cout << "Parsing Successful" << std::endl;
+        //printTree(root);
+    }
+    return 0;
 }
