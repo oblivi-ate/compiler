@@ -21,7 +21,6 @@ static std::string tokenNames[] = {
     "ENDFILE",
     "ST",
     "DEF"
-    // Add other token names if necessary
 };
 
 // 定义 NodeKind 对应的字符串名称
