@@ -1,5 +1,5 @@
 #include "parser.h"
-#include "parsetree.h"
+#include "parser_print.h"
 #include "token.h"
 #include "scanner.h"
 
@@ -82,6 +82,7 @@ TreeNode *program(bool &status) // program → declaration-list
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Program";
     result->line = pos->line;
 
     if (result->child[0] = declaration_list(s), s == true)
@@ -99,6 +100,7 @@ TreeNode *declaration_list(bool &status) // declaration-list → declaration | d
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Declaration List";
     result->line = pos->line;
 
     if (result->child[0] = declaration(s), s == true)
@@ -125,6 +127,7 @@ TreeNode *declaration(bool &status) // declaration → var-declaration | fun-dec
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Declaration";
     result->line = pos->line;
 
     if (result->child[0] = var_declaration(s), s == true)
@@ -194,6 +197,7 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
                 prev_pos(); // back to type-specifier
                 status = false;
                 result->nodekind = NodeKind::NULL_ND;
+                result->info = "Var Declaration";
                 return nullptr;
             }
             else
@@ -217,6 +221,7 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
 
     status = false;
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Var Declaration";
     return nullptr;
 }
 
@@ -360,6 +365,7 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
         }
     }
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Fun Declaration";
     status = false;
     return nullptr;
 }
@@ -368,6 +374,7 @@ TreeNode *params(bool &status) // params → void | param-list
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Params";
     result->line = pos->line;
 
     if (result->child[0] = param_list(s), s == true)
@@ -385,6 +392,7 @@ TreeNode *param_list(bool &status) // param-list → param | param , param-list
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Param List";
     result->line = pos->line;
 
     if (result->child[0] = param(s), s == true)
@@ -461,7 +469,7 @@ TreeNode *compound_stmt(bool &status) // compound-stmt → local-declarations st
         }
         else
         {
-            expect("Syntax Error: Expecting statement_list");
+            expect("Syntax Error: Expecting ';'");
         }
     }
     status = false;
@@ -473,6 +481,7 @@ TreeNode *local_declarations(bool &status) // local-declarations → var-declara
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Local Declarations";
     result->line = pos->line;
 
     if (result->child[0] = var_declaration(s), s == true)
@@ -496,6 +505,7 @@ TreeNode *statement_list(bool &status) // statement-list → statement statement
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Statement List";
     result->line = pos->line;
 
     if (result->child[0] = stmt(s), s == true)
@@ -729,6 +739,7 @@ TreeNode *expression(bool &status) // expression → var = expression | simple-e
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Expression";
     result->line = pos->line;
 
     if (result->child[0] = var(s), s == true)
@@ -799,6 +810,7 @@ TreeNode *simple_expr(bool &status) // simple-expression → additive-expression
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Simple Expression";
     result->line = pos->line;
 
 
@@ -835,7 +847,9 @@ TreeNode *relop(bool &status) // relop → <= | < | > | >= | == | !=
 
     if (check(TokenType::LTE) || check(TokenType::LT) || check(TokenType::GT) || check(TokenType::GTE) || check(TokenType::EQ) || check(TokenType::NEQ))
     {
+        prev_pos();
         result->attr.exprAttr.op = pos->token.type;
+        next_pos();
         status = true;
         return result;
     }
@@ -849,6 +863,7 @@ TreeNode *additive_expr(bool &status) // additive_expr → term | term addop add
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Additive Expression";
     result->line = pos->line;
 
     if (result->child[0] = term(s), s == true)
@@ -885,7 +900,9 @@ TreeNode *addop(bool &status) // addop → + | -
 
     if (check(TokenType::PLUS) || check(TokenType::MINUS))
     {
+        prev_pos();
         result->attr.exprAttr.op = pos->token.type;
+        next_pos();
         status = true;
         return result;
     }
@@ -899,6 +916,7 @@ TreeNode *term(bool &status) // term → factor | factor mulop term
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Term";
     result->line = pos->line;
     if (result->child[0] = factor(s), s == true)
     {
@@ -934,7 +952,9 @@ TreeNode *mulop(bool &status) // mulop → * | /
 
     if (check(TokenType::TIMES) || check(TokenType::DIVIDE))
     {
+        prev_pos();
         result->attr.exprAttr.op = pos->token.type;
+        next_pos();
         status = true;
         return result;
     }
@@ -956,6 +976,7 @@ TreeNode *factor(bool &status) // factor → ( expression ) | NUM | var | call
             if (check(TokenType::RPAREN))
             {
                 result->nodekind = NodeKind::NULL_ND;
+                result->info = "Factor";
                 status = true;
                 return result;
             }
@@ -973,6 +994,7 @@ TreeNode *factor(bool &status) // factor → ( expression ) | NUM | var | call
     else if (pos->token.type == TokenType::ID)
     {
         result->nodekind = NodeKind::NULL_ND;
+        result->info = "Factor";
         if (result->child[0] = var(s), s == true)
         {
             status = true;
@@ -1023,6 +1045,7 @@ TreeNode *args(bool &status) // args → arg_list | empty
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Args";
     result->line = pos->line;
 
     if (result->child[0] = arg_list(s), s == true)
@@ -1040,6 +1063,7 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
     bool s = false;
     TreeNode *result = new TreeNode();
     result->nodekind = NodeKind::NULL_ND;
+    result->info = "Arg List";
     result->line = pos->line;
 
     if (result->child[0] = expression(s), s == true)
@@ -1063,49 +1087,27 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
     return nullptr;
 }
 
-void printTree(TreeNode *root)
-{
-    std::vector<TreeNode *> queue;
-    queue.push_back(root);
-    while (!queue.empty())
-    {
-        TreeNode *node = queue.front();
-        queue.erase(queue.begin());
-        std::cout << "NodeKind: " << node->nodekind << std::endl;
-        std::cout << "Line: " << node->line << std::endl;
-        if (node->nodekind == NodeKind::DCL && node->kind.dcl == DclKind::VAR_DCL)
-        {
-            std::cout << "Name: " << node->attr.dclAttr.name << std::endl;
-        }
-        for (int i = 0; i < MAX_CHILDREN; i++)
-        {
-            if (node->child[i] != nullptr)
-            {
-                queue.push_back(node->child[i]);
-            }
-        }
-    }
-}
+
 
 int main(int argc, char *argv[])
 {
-    std::cout << "Parser" << std::endl;
+    std::cout << "Parser: Start" << std::endl;
+
     get_parser_token(argc, argv);
-    printToken(pos);
     bool status = false;
     TreeNode *root = program(status);
     if (status == true)
     {
-        std::cout << "Parsing Successful" << std::endl;
+        std::cout << "Parsing Successfully" << std::endl;
         // printTree(root);
     }
     else
     {
         std::cout << "Parsing Failed" << std::endl;
     }
-    // print tree
 
-    printTree(root);
+    std::cout << std::endl << std::endl;
 
+    print_tree(root);
     return 0;
 }

@@ -1,7 +1,25 @@
-#include "parser.h"
 #include "parser_print.h"
 
+#include <iostream>
+
 #define INDENT_GAP 2
+
+const char* token_type_to_string(TokenType type) {
+    switch (type) {
+    case TokenType::PLUS: return "+";
+    case TokenType::MINUS: return "-";
+    case TokenType::TIMES: return "*";
+    case TokenType::DIVIDE: return "/";
+    case TokenType::ASSIGN: return "=";
+    case TokenType::LTE: return "<=";
+    case TokenType::LT: return "<";
+    case TokenType::GT: return ">";
+    case TokenType::GTE: return ">=";
+    case TokenType::EQ: return "==";
+    case TokenType::NEQ: return "!=";
+    default: return "Unknown Token";
+    }
+}
 
 static void print_expr_type(ExprType t) {
     switch (t) {
@@ -26,7 +44,6 @@ void print_tree(TreeNode *tree) {
         switch (tree->nodekind) {
         case NodeKind::DCL:
             printf("Declare: ");
-            print_expr_type(tree->attr.dclAttr.type);
             printf(" %s ", tree->attr.dclAttr.name);
             switch (tree->kind.dcl) {
             case DclKind::ARRAY_DCL: printf("[%d]\n", tree->attr.dclAttr.size); break;
@@ -77,11 +94,12 @@ void print_tree(TreeNode *tree) {
             case ExprKind::ID_EXPR: printf("ID: %s\n", tree->attr.exprAttr.name); break;
             case ExprKind::CALL_EXPR: printf("Call function: %s, with arguments:\n", tree->attr.exprAttr.name); break;
             case ExprKind::ARRAY_EXPR: printf("Array: %s\n", tree->attr.exprAttr.name); break;
+            case ExprKind::TYPE_EXPR: printf("Type: "); print_expr_type(tree->attr.dclAttr.type); printf("\n"); break;
             default: printf("Unknown ExpNode kind\n"); break;
             }
             break;
         default:
-            printf("Unknown node kind\n");
+            std::cout << tree->info << std::endl;
             break;
         }
         for (int i = 0; i < MAX_CHILDREN; i++) {

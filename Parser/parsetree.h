@@ -58,6 +58,7 @@ struct TreeNode
     } attr; 
 
     ExprType type; 
+    std::string info;
 
     // constructor of tree node 
     TreeNode()
@@ -73,4 +74,4 @@ struct TreeNode
 
 
 
-#endif //PARSERTREE_H
+#endif 
