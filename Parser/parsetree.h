@@ -16,7 +16,7 @@ enum StmtKind
 
 enum ExprKind
 {
-    OP_EXPR, CONST_EXPR, ID_EXPR, CALL_EXPR, ARRAY_EXPR
+    OP_EXPR, CONST_EXPR, ID_EXPR, CALL_EXPR, ARRAY_EXPR, TYPE_EXPR
 };
 
 enum ParamKind

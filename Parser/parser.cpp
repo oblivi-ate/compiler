@@ -10,12 +10,19 @@
 #include <vector>
 #include <stdexcept>
 
+
+
+Token_List *pos; // get result from scanner
+
 void test(std::string s)
 {
     std::cout << "Parser: " << s << std::endl;
 }
 
-Token_List *pos; // get result from scanner
+void test(){
+    std::cout << pos->token.info << std::endl;
+}
+
 void get_parser_token(int argc, char *argv[])
 {
     doScan(argc, argv, pos);
@@ -127,7 +134,6 @@ TreeNode *declaration(bool &status) // declaration → var-declaration | fun-dec
     }
     else if (result->child[0] = fun_declaration(s), s == true)
     {
-        std::cout << "fun_declaration" << std::endl;
         status = true;
         return result;
     }
@@ -187,6 +193,7 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
                 prev_pos(); // back to ID
                 prev_pos(); // back to type-specifier
                 status = false;
+                result->nodekind = NodeKind::NULL_ND;
                 return nullptr;
             }
             else
@@ -217,7 +224,8 @@ TreeNode *type_specifier(bool &status) // type-specifier → int | void
 {
     bool s = false;
     TreeNode *result = new TreeNode();
-    result->nodekind = NodeKind::DCL;
+    result->nodekind = NodeKind::EXPR;
+    result->kind.expr = ExprKind::TYPE_EXPR;
     result->line = pos->line;
 
     if (check(TokenType::INT))
@@ -248,11 +256,9 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
     {
         if (check(TokenType::ID))
         {
-
             result->kind.dcl = DclKind::FUN_DCL;
             prev_pos();
             result->attr.dclAttr.name = pos->token.info.c_str();
-            std::cout << pos->token.info << std::endl;
             next_pos();
             if (check(TokenType::LPAREN))
             {
@@ -260,22 +266,37 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
                 {
                     if (check(TokenType::RPAREN))
                     {
-                        if (result->child[2] = compound_stmt(s), s == true)
+                        if (check(TokenType::LBRACE))
                         {
-                            if (check(TokenType::SEMICOLON))
+
+                            if (result->child[2] = compound_stmt(s), s == true)
                             {
-                                status = true;
-                                return result;
-                            }
-                            else
-                            {
-                                expect("Syntax Error: Expecting ';'");
+                                if (check(TokenType::RBRACE))
+                                {
+                                    if (check(TokenType::SEMICOLON))
+                                    {
+                                        status = true;
+                                        return result;
+                                    }
+                                    else
+                                    {
+                                        expect("Syntax Error: Expecting ';'");
+                                    }
+                                }
+                                else
+                                {
+                                    expect("Syntax Error: Expecting '}'");
+                                }
                             }
                         }
                         else
                         {
-                            expect("Syntax Error: Expecting ')'");
+                            expect("Syntax Error: Expecting '{'");
                         }
+                    }
+                    else
+                    {
+                        expect("Syntax Error: Expecting ')'");
                     }
                 }
             }
@@ -298,17 +319,32 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
                     {
                         if (check(TokenType::RPAREN))
                         {
-                            if (result->child[2] = compound_stmt(s), s == true)
+                            if (check(TokenType::LBRACE))
                             {
-                                if (check(TokenType::SEMICOLON))
+
+                                if (result->child[2] = compound_stmt(s), s == true)
                                 {
-                                    status = true;
-                                    return result;
+                                    if (check(TokenType::RBRACE))
+                                    {
+                                        if (check(TokenType::SEMICOLON))
+                                        {
+                                            status = true;
+                                            return result;
+                                        }
+                                        else
+                                        {
+                                            expect("Syntax Error: Expecting ';'");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        expect("Syntax Error: Expecting '}'");
+                                    }
                                 }
-                                else
-                                {
-                                    expect("Syntax Error: Expecting ';'");
-                                }
+                            }
+                            else
+                            {
+                                expect("Syntax Error: Expecting '{'");
                             }
                         }
                         else
@@ -409,7 +445,7 @@ TreeNode *param(bool &status) // param → type-specifier ID | type-specifier ID
     return nullptr;
 }
 
-TreeNode *compound_stmt(bool &status) // compound-stmt → { local-declarations statement-list }
+TreeNode *compound_stmt(bool &status) // compound-stmt → local-declarations statement-list
 {
     bool s = false;
     TreeNode *root = new TreeNode();
@@ -417,30 +453,26 @@ TreeNode *compound_stmt(bool &status) // compound-stmt → { local-declarations 
     root->kind.stmt = StmtKind::CMPD_STMT;
     root->line = pos->line;
 
-    if (check(TokenType::LBRACE))
+    if (check(TokenType::RBRACE))
     {
-        if (root->child[0] = local_declarations(s), s == true)
+        prev_pos();
+        status = false;
+        return nullptr;
+    }
+    if (root->child[0] = local_declarations(s), s == true)
+    {
+        if (root->child[1] = statement_list(s), s == true)
         {
-            if (root->child[1] = statement_list(s), s == true)
-            {
-                if (check(TokenType::RBRACE))
-                {
-                    status = true;
-                    return root;
-                }
-                else
-                {
-                    expect("Syntax Error: Expecting '}'");
-                }
-            }
-            else
-            {
-                expect("Syntax Error: Expecting statement_list");
-            }
+            status = true;
+            return root;
+        }
+        else
+        {
+            expect("Syntax Error: Expecting statement_list");
         }
     }
-
-    expect("Syntax Error: Expecting '{'");
+    status = false;
+    return nullptr;
 }
 
 TreeNode *local_declarations(bool &status) // local-declarations → var-declarations local-declaration | empty
@@ -456,6 +488,9 @@ TreeNode *local_declarations(bool &status) // local-declarations → var-declara
         {
             status = true;
             return result;
+        }
+        else{
+            prev_pos();
         }
     }
 
@@ -477,10 +512,15 @@ TreeNode *statement_list(bool &status) // statement-list → statement statement
             status = true;
             return result;
         }
+        else
+        {
+            status = true;
+            return result;
+        }
     }
 
-    status = true;
-    return result;
+    status = false;
+    return nullptr;
 }
 
 TreeNode *stmt(bool &status) // statement → expression-stmt | compound-stmt | selection-stmt | iteration-stmt | return-stmt
@@ -530,7 +570,6 @@ TreeNode *expression_stmt(bool &status) // expression-stmt → expression ; | ;
             return result;
         }
     }
-
     status = false;
     return nullptr;
 }
@@ -708,6 +747,14 @@ TreeNode *expression(bool &status) // expression → var = expression | simple-e
                 status = true;
                 return result;
             }
+            else
+            {
+                prev_pos(); // back to ASSIGN
+            }
+        }
+        else
+        {
+            prev_pos(); // back to var
         }
     }
     else if (result->child[0] = simple_expr(s), s == true)
@@ -717,7 +764,6 @@ TreeNode *expression(bool &status) // expression → var = expression | simple-e
     }
 
     status = false;
-    expect("Syntax Error: Expecting 'var' or 'simple-exprssion'");
     return nullptr;
 }
 
@@ -762,10 +808,13 @@ TreeNode *simple_expr(bool &status) // simple-expression → additive-expression
     result->nodekind = NodeKind::NULL_ND;
     result->line = pos->line;
 
+    
     if (result->child[0] = additive_expr(s), s == true)
     {
+
         if (result->child[1] = relop(s), s == true)
         {
+
             if (result->child[2] = simple_expr(s), s == true)
             {
                 status = true;
@@ -1023,22 +1072,27 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
     return nullptr;
 }
 
-void printTree(TreeNode *root, int deep)
+void printTree(TreeNode *root)
 {
-    if (root == nullptr)
+    std::vector<TreeNode *> queue;
+    queue.push_back(root);
+    while (!queue.empty())
     {
-        return;
-    }
-    std::cout << "Deep: " << deep << std::endl;
-    std::cout << "NodeKind: " << root->nodekind << std::endl;
-    std::cout << "Line: " << root->line << std::endl;
-    if (root->nodekind == NodeKind::DCL && root->kind.dcl == DclKind::VAR_DCL)
-    {
-        std::cout << "Name: " << root->attr.dclAttr.name << std::endl;
-    }
-    for (int i = 0; i < 4; i++)
-    {
-        printTree(root->child[i], deep + 1);
+        TreeNode *node = queue.front();
+        queue.erase(queue.begin());
+        std::cout << "NodeKind: " << node->nodekind << std::endl;
+        std::cout << "Line: " << node->line << std::endl;
+        if (node->nodekind == NodeKind::DCL && node->kind.dcl == DclKind::VAR_DCL)
+        {
+            std::cout << "Name: " << node->attr.dclAttr.name << std::endl;
+        }
+        for (int i = 0; i < MAX_CHILDREN; i++)
+        {
+            if (node->child[i] != nullptr)
+            {
+                queue.push_back(node->child[i]);
+            }
+        }
     }
 }
 
@@ -1059,7 +1113,8 @@ int main(int argc, char *argv[])
         std::cout << "Parsing Failed" << std::endl;
     }
     // print tree
-    printTree(root, 1);
+
+    printTree(root);
 
     return 0;
 }

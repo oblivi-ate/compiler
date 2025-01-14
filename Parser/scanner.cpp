@@ -64,6 +64,16 @@ int doScan(int argc, char *argv[], Token_List *&tk){
     token_list = token_list->next;
     token_list->prev = nullptr;
     
+
+    // delete EOF token
+    temp = token_list;
+    while (temp->next != nullptr)
+    {
+        temp = temp->next;
+    }
+    temp->prev->next = nullptr;
+    delete temp;
+    
     tk = token_list;
 
 
