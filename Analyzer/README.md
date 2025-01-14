@@ -1,12 +1,8 @@
 ### Group member contribution
-YU QIANSHUO : parsetree(.cpp & .h) <br>
-WANG KUN, ZHENG AO: parser(.cpp & .h) <br>
+YU QIANSHUO : symbol_table(.cpp & .h) <br>
+WANG KUN, ZHENG AO: analyzer(.cpp & .h) <br>
 
 
-### Note:
-- Annotations in English
-- Successfully run
-- Print the results correctly
 
 
 #### Compile
@@ -16,7 +12,16 @@ WANG KUN, ZHENG AO: parser(.cpp & .h) <br>
 `./parser test.pyc`
 
 
-Reference: <br>
-https://github.com/brokencuph/cs106-pym-compiler <br>
-Project address: <br>
-https://github.com/oblivi-ate/compiler -> Parser
+### Analyzer Summary
+
+#### symbol_table.cpp
+
+#### symbol_table.h
+
+#### s_analyzer.cpp
+
+#### s_analyzer.h
+
+#### sa_driver.cpp
+
+

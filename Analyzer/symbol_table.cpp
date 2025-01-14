@@ -5,7 +5,7 @@
 
 // 符号类型名称数组，用于打印符号类型
 static std::string exprTypeNames[] = {
-    "TBD", "Void", "Int"
+    "Void", "Int"
 };
 
 // PycSymRef 构造函数实现
