@@ -4,6 +4,7 @@ WANG KUN, ZHENG AO: analyzer(.cpp & .h) <br>
 
 
 #### Compile
+gcc version 8.0 or above is required for the code to compile. <br>
 ` g++ token.cpp dfa.cpp scanner.cpp parser.cpp parsetree.cpp parser_print.cpp symbol_table.cpp analyzer.cpp driver.cpp -o parser -std=c++17 `
 
 #### Run
