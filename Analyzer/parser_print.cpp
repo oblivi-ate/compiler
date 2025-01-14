@@ -46,7 +46,7 @@ void print_tree(TreeNode *tree) {
             printf("Declare: ");
             printf(" %s ", tree->attr.dclAttr.name);
             switch (tree->kind.dcl) {
-            case DclKind::ARRAY_DCL: printf("[%d]\n", tree->attr.dclAttr.size); break;
+            case DclKind::ARRAY_EXPR_DCL: printf("[%d]\n", tree->attr.dclAttr.size); break;
             case DclKind::FUN_DCL: printf("function with parameters:\n"); break;
             case DclKind::VAR_DCL: printf("\n"); break;
             default: printf("Unknown DclNode kind\n"); break;
@@ -57,7 +57,7 @@ void print_tree(TreeNode *tree) {
             print_expr_type(tree->attr.dclAttr.type);
             if (tree->attr.dclAttr.type != ExprType::Void) {
                 printf(" %s", tree->attr.dclAttr.name);
-                if (tree->kind.param == ParamKind::ARRAY_PARAM)
+                if (tree->kind.param == ParamKind::ARRAY_EXPR_PARAM)
                     printf(" [ ]");
             }
             printf("\n");

@@ -81,8 +81,6 @@ public:
     void print_table();
 };
 
-// 共享符号表类型别名
-using SharedSymbolTable = std::shared_ptr<SymbolTable>;
 
 #endif // SYMBOL_TABLE_H_
 

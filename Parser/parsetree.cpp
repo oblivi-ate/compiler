@@ -24,7 +24,7 @@
 // };
 
 // // 定义 NodeKind 对应的字符串名称
-// static std::string nodeKindNames[] = {
+// static std::string nodekindNames[] = {
 //     "NULL_ND", "STMT", "EXPR", "PARAM", "DCL"
 // };
 
@@ -40,12 +40,12 @@
 
 // // 定义 ParamKind 对应的字符串名称
 // static std::string paramKindNames[] = {
-//     "VAR_PARAM", "ARRAY_PARAM", "VOID_PARAM"
+//     "VAR_PARAM", "ARRAY_EXPR_PARAM", "VOID_PARAM"
 // };
 
 // // 定义 DclKind 对应的字符串名称
 // static std::string dclKindNames[] = {
-//     "VAR_DCL", "ARRAY_DCL", "FUN_DCL"
+//     "VAR_DCL", "ARRAY_EXPR_DCL", "FUN_DCL"
 // };
 
 // // 定义 ExprType 对应的字符串名称
@@ -112,7 +112,7 @@
 // {
 //     static int spaceNum = 0;
 //     os << std::string(spaceNum, ' ');
-//     os << t.line << ": " << nodeKindNames[static_cast<int>(t.nodekind)] << " ";
+//     os << t.line << ": " << nodekindNames[static_cast<int>(t.nodekind)] << " ";
 
 //     switch (t.nodekind)
 //     {

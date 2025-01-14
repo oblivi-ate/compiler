@@ -3,8 +3,9 @@
 
 #include "scanner.h"
 #include "parser.h"
-#include "s_analyser.h"
+#include "analyzer.h"
 
+using fs=std::experimental::filesystem;
 using namespace std::string_literals;
 
 void run_scanner_and_parser(const char* fileName)
@@ -45,7 +46,7 @@ void run_scanner_and_parser(const char* fileName)
 		}
 	}
 	Parser parser(x);
-	SharedTreeNode res;
+	TreeNode* res;
 	try
 	{
 		res = parser.parse();

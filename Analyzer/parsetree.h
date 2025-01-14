@@ -21,11 +21,11 @@ enum ExprKind
 
 enum ParamKind
 {
-    VAR_PARAM, ARRAY_PARAM, VOID_PARAM
+    VAR_PARAM, ARRAY_EXPR_PARAM, VOID_PARAM
 };
 
 enum DclKind{
-    VAR_DCL, ARRAY_DCL, FUN_DCL
+    VAR_DCL, ARRAY_EXPR_DCL, FUN_DCL
 };
 
 enum ExprType

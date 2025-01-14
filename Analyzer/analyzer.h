@@ -8,23 +8,23 @@ class SemanticAnalyser
 {
 private:
 	TreeNode* parseTree; // this will be modified by Analyser
-	SharedSymbolTable symTable;
+	SymbolTable* symTable;
 
 	bool _error = false;
 	
-	SharedSymbolTable genSymbolTableTop();
+	SymbolTable* genSymbolTableTop();
 
-	void genSymbolTable(TreeNode* tr, SharedSymbolTable st);
+	void genSymbolTable(TreeNode* tr, SymbolTable* st);
 
-	SharedSymbolTable genSymbolTable();
+	SymbolTable* genSymbolTable();
 	int assignTypes(TreeNode *tr);
 
-	void reportError(int lineNo, const char* msg);
-	void reportError(int lineNo, const std::string& msg);
+	void reportError(int line, const char* msg);
+	void reportError(int line, const std::string& msg);
 public:
 	SemanticAnalyser(TreeNode*);
 
-	SharedSymbolTable getSymbolTable();
+	SymbolTable* getSymbolTable();
 	void assignTypes();
 
 	bool error();

@@ -162,7 +162,7 @@ TreeNode *var_declaration(bool &status) //  var-declaration → type-specifier I
             next_pos();
             if (check(TokenType::LBRACKET))
             {
-                result->kind.dcl = DclKind::ARRAY_DCL;
+                result->kind.dcl = DclKind::ARRAY_EXPR_DCL;
                 if (check(TokenType::NUMBER))
                 {
                     prev_pos();
