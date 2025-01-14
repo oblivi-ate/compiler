@@ -27,7 +27,7 @@ struct SymbolTable;
 // 符号结构体，表示一个符号（变量、函数等）
 struct PycSymbol
 {
-    SymbolTable* parent;      // 所属的符号表
+    SymbolTable* parent;     // 所属的符号表
     PycSymRefList refs;      // 符号引用列表
     TreeNode* declNode;      // 符号的声明节点
     std::string typeName;    // 符号的类型名称

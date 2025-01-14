@@ -1089,7 +1089,7 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
 
 
 
-int main(int argc, char *argv[])
+int doParser(int argc, char *argv[])
 {
     std::cout << "Parser: Start" << std::endl;
 

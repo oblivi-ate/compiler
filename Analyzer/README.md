@@ -10,7 +10,7 @@ WANG KUN, ZHENG AO: parser(.cpp & .h) <br>
 
 
 #### Compile
-`g++ token.cpp dfa.cpp scanner.cpp parser.cpp parsetree.cpp parser_print.cpp -o parser -std=c++17`
+`g++ token.cpp dfa.cpp scanner.cpp parser.cpp parsetree.cpp parser_print.cpp symbol_table.cpp sa_driver.cpp -o parser -std=c++17`
 
 #### Run
 `./parser test.pyc`
