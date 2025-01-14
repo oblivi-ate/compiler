@@ -268,7 +268,6 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
                     {
                         if (check(TokenType::LBRACE))
                         {
-
                             if (result->child[2] = compound_stmt(s), s == true)
                             {
                                 if (check(TokenType::RBRACE))
@@ -285,7 +284,7 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
                                 }
                                 else
                                 {
-                                    expect("Syntax Error: Expecting '}'");
+                                    expect("1Syntax Error: Expecting '}'");
                                 }
                             }
                         }
@@ -338,7 +337,7 @@ TreeNode *fun_declaration(bool &status) // fun-declaration → type-specifier ID
                                     }
                                     else
                                     {
-                                        expect("Syntax Error: Expecting '}'");
+                                        expect("2Syntax Error: Expecting '}'");
                                     }
                                 }
                             }
@@ -453,12 +452,6 @@ TreeNode *compound_stmt(bool &status) // compound-stmt → local-declarations st
     root->kind.stmt = StmtKind::CMPD_STMT;
     root->line = pos->line;
 
-    if (check(TokenType::RBRACE))
-    {
-        prev_pos();
-        status = false;
-        return nullptr;
-    }
     if (root->child[0] = local_declarations(s), s == true)
     {
         if (root->child[1] = statement_list(s), s == true)
@@ -611,7 +604,7 @@ TreeNode *selection_stmt(bool &status) // selection-stmt → if ( expression ) {
                                             }
                                             else
                                             {
-                                                expect("Syntax Error: Expecting '}'");
+                                                expect("3Syntax Error: Expecting '}'");
                                             }
                                         }
                                     }
@@ -628,7 +621,7 @@ TreeNode *selection_stmt(bool &status) // selection-stmt → if ( expression ) {
                             }
                             else
                             {
-                                expect("Syntax Error: Expecting '}'");
+                                expect("4Syntax Error: Expecting '}'");
                             }
                         }
                     }
@@ -673,7 +666,7 @@ TreeNode *iteration_stmt(bool &status) // iteration-stmt → while ( expression 
                             }
                             else
                             {
-                                expect("Syntax Error: Expecting '}'");
+                                expect("5Syntax Error: Expecting '}'");
                             }
                         }
                     }
@@ -757,7 +750,7 @@ TreeNode *expression(bool &status) // expression → var = expression | simple-e
             prev_pos(); // back to var
         }
     }
-    else if (result->child[0] = simple_expr(s), s == true)
+    if (result->child[0] = simple_expr(s), s == true)
     {
         status = true;
         return result;
@@ -808,7 +801,7 @@ TreeNode *simple_expr(bool &status) // simple-expression → additive-expression
     result->nodekind = NodeKind::NULL_ND;
     result->line = pos->line;
 
-    
+
     if (result->child[0] = additive_expr(s), s == true)
     {
 
@@ -860,7 +853,7 @@ TreeNode *additive_expr(bool &status) // additive_expr → term | term addop add
 
     if (result->child[0] = term(s), s == true)
     {
-        if (check(TokenType::PLUS) || check(TokenType::MINUS))
+        if (pos->token.type == TokenType::PLUS || pos->token.type == TokenType::MINUS)
         {
             if (result->child[1] = addop(s), s == true)
             {
@@ -898,7 +891,6 @@ TreeNode *addop(bool &status) // addop → + | -
     }
 
     status = false;
-    expect("Syntax Error: Expecting '+' or '-'");
     return nullptr;
 }
 
@@ -910,7 +902,7 @@ TreeNode *term(bool &status) // term → factor | factor mulop term
     result->line = pos->line;
     if (result->child[0] = factor(s), s == true)
     {
-        if (check(TokenType::TIMES) || check(TokenType::DIVIDE))
+        if (pos->token.type == TokenType::TIMES || pos->token.type == TokenType::DIVIDE)
         {
             if (result->child[1] = mulop(s), s == true)
             {
@@ -948,7 +940,6 @@ TreeNode *mulop(bool &status) // mulop → * | /
     }
 
     status = false;
-    expect("Syntax Error: Expecting '*' or '/'");
     return nullptr;
 }
 
