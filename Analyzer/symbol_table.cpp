@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <iostream>
+#include <iomanip>
 #include "symbol_table.h"
 
 // 符号类型名称数组，用于打印符号类型
