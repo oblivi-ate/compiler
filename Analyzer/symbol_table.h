@@ -31,4 +31,9 @@ void add_symbol(struct Symbol_table* table, char nodeType, int position);
 
 unsigned long get_symbol_hash(char nodeType);
 
+Symbol_table* create_symbol_table(char somethingChar);
+
+void destroy_symbol_table(Symbol_table* table);
+
+
 #endif 
