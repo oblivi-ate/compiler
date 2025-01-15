@@ -1107,7 +1107,6 @@ int doParser(int argc, char *argv[], TreeNode *root)
 
     std::cout << std::endl << std::endl;
 
-    print_tree(root);
     return 0;
 }
 

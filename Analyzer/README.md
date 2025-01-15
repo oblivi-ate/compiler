@@ -6,11 +6,11 @@ ZHENG AO: driver(.cpp) <br>
 
 #### Compile
 gcc version 8.0 or above is required for the code to compile. <br>
-` g++ token.cpp dfa.cpp scanner.cpp parser.cpp parsetree.cpp parser_print.cpp symbol_table.cpp analyzer.cpp driver.cpp -o parser -std=c++17 `
+` g++ token.cpp dfa.cpp scanner.cpp parser.cpp parsetree.cpp parser_print.cpp symbol_table.cpp analyzer.cpp driver.cpp -o analyzer -std=c++17 `
 
 #### Run
-`./parser test_correct.pyc`
-`./parser test_wrong.pyc`
+`./analyzer test_correct.pyc`
+`./analyzer test_wrong.pyc`
 
 
 ### Analyzer Summary
