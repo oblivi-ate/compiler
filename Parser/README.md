@@ -1,3 +1,10 @@
+
+### Group member
+
+YU QIANSHUO : 1210027225 &nbsp;
+WANG KUN : 1210025783 &nbsp;
+ZHENG AO : 1220005554 &nbsp;
+
 ### Group member contribution
 YU QIANSHUO : parsetree(.cpp & .h) <br>
 WANG KUN, ZHENG AO: parser(.cpp & .h), parser_print(.cpp & .h) <br>
