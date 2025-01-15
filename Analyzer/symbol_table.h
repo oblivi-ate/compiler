@@ -1,39 +1,76 @@
 #ifndef SYMBOL_TABLE_H_
 #define SYMBOL_TABLE_H_
 
+#include <string>
 #include <list>
 #include <unordered_map>
 #include <memory>
-#include <string>
 #include "parsetree.h"
-struct Postable{
-    struct Postable* table;
-    int position;
+
+
+struct SymbolTable;
+
+struct PycSymRef {
+    PycSymbol* parent;       
+    TreeNode* refNode;       
+    PycSymRef* next;         
+
+    PycSymRef(PycSymbol* p, TreeNode* rN)
+        : parent(p), refNode(rN), next(nullptr) {}
 };
 
-struct PycNode {
-    char nodeType;
-    struct Postabel *next
-    struct PycNode* next;
-} ;
 
-struct Symbol_table{
-    struct PycNode* table;
-    char something;
-    struct Symbol_tabel* next;
+struct PycSymbol {
+    SymbolTable* parent;     
+    PycSymRef* refs;          
+    TreeNode* declNode;    
+    std::string typeName;    
+    PycSymbol* next;     
+
+    PycSymbol(SymbolTable* p, TreeNode* dN, const std::string& type)
+        : parent(p), refs(nullptr), declNode(dN), typeName(type), next(nullptr) {}
 };
 
-unsigned long hash_function(char nodeType);
 
-void traverse_symbol_table(struct Symbol_table* table);
+struct SymbolTable {
+private:
+    static int internal_id; 
 
-void add_symbol(struct Symbol_table* table, char nodeType, int position);
+public:
+    const int id;            
+    TreeNode* tableNode;   
 
-unsigned long get_symbol_hash(char nodeType);
+  
+    std::shared_ptr<SymbolTable> lower;   
+    std::shared_ptr<SymbolTable> next;    
+    std::weak_ptr<SymbolTable> upper;     
 
-Symbol_table* create_symbol_table(char somethingChar);
+   
+    PycSymbol* symbols;
 
-void destroy_symbol_table(Symbol_table* table);
+   
+    SymbolTable(TreeNode* t);
+    SymbolTable(TreeNode* t, int id);
 
+  
+    void add_symbol(const std::string& name, const std::string& type, TreeNode* declNode);
+
+   
+    PycSymbol* lookup(const std::string& name);
+
+    bool check_local(const std::string& name);
+
+  
+    void print_table();
+};
+
+
+struct SymbolTableManager {
+    std::shared_ptr<SymbolTable> current;  
+    std::shared_ptr<SymbolTable> global;  
+};
+
+
+extern SymbolTableManager symTableManager;
 
 #endif 
