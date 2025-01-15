@@ -1,99 +1,130 @@
-// symbol_table.cpp
-
-#include "symbol_table.h"
+#include <stdexcept>
 #include <iostream>
 #include <iomanip>
-#include <cstdlib>
-#include <cstring>
+#include "symbol_table.h"
 
-//define posttable
-PycNode::PycNode(char type, int pos)
-    : nodeType(type), nextPostable(nullptr), next(nullptr)
+
+int SymbolTable::internal_id = 0;
+
+
+SymbolTableManager symTableManager = { nullptr, nullptr };
+
+
+SymbolTable::SymbolTable(TreeNode* t)
+    : id(internal_id++), tableNode(t), symbols(nullptr)
 {
-    nextPostable = new Postable{nullptr, pos};
-}
-
-// define symbol table
-Symbol_table::Symbol_table(char somethingChar)
-    : table(nullptr), something(somethingChar), next(nullptr)
-{
-}
-
-//hash function
-unsigned long hash_function(char nodeType) {
-    unsigned long hash = 5381;
-    hash = ((hash << 5) + hash) + nodeType; // hash * 33 + nodeType
-    return hash;
-}
-
-// get hash value
-unsigned long get_symbol_hash(char nodeType) {
-    return hash_function(nodeType);
-}
-
-// print table
-void traverse_symbol_table(const Symbol_table* table) {
-    while (table != nullptr) {
-        std::cout << "Symbol Table: " << table 
-                  << ", Something: " << table->something << std::endl;
-        const PycNode* node = table->table;
-        while (node != nullptr) {
-            std::cout << "\tPycNode: nodeType: " << node->nodeType << std::endl;
-            const Postable* post = node->nextPostable;
-            while (post != nullptr) {
-                std::cout << "\t\tPostable: table: " << post->table 
-                          << ", position: " << post->position << std::endl;
-                post = post->table;
-            }
-            node = node->next;
-        }
-        table = table->next;
+   
+    if (symTableManager.current) {
+        upper = symTableManager.current;
+    } else {
+        upper.reset(); 
     }
+    lower = nullptr;
+    next = nullptr;
+
+    symTableManager.current = std::make_shared<SymbolTable>(*this);
 }
 
-// add new node
-void add_symbol(Symbol_table* table, char nodeType, int position) {
-    if (table == nullptr) {
-        std::cerr << "Error: Symbol table is NULL." << std::endl;
+SymbolTable::SymbolTable(TreeNode* t, int id)
+    : id(id), tableNode(t), symbols(nullptr)
+{
+    internal_id = id + 1;
+    if (symTableManager.current) {
+        upper = symTableManager.current;
+    } else {
+        upper.reset();
+    }
+    lower = nullptr;
+    next = nullptr;
+
+    symTableManager.current = std::make_shared<SymbolTable>(*this);
+}
+
+
+void SymbolTable::add_symbol(const std::string& name, const std::string& type, TreeNode* declNode) {
+    if (check_local(name)) {
+        std::cerr << "Error: Symbol '" << name << "' already defined in the current scope." << std::endl;
         return;
     }
 
+    PycSymbol* newSym = new PycSymbol(this, declNode, type);
+    newSym->next = symbols;
+    symbols = newSym;
+}
+
+
+PycSymbol* SymbolTable::lookup(const std::string& name) {
  
-    PycNode* newNode = new PycNode(nodeType, position);
-    if (!newNode) {
-        std::cerr << "Error: Unable to allocate memory for PycNode." << std::endl;
-        std::exit(EXIT_FAILURE);
+    PycSymbol* sym = symbols;
+    while (sym) {
+        if (sym->typeName == name) { 
+            return sym;
+        }
+        sym = sym->next;
     }
 
-    newNode->next = table->table;
-    table->table = newNode;
-}
-//create new table
-Symbol_table* create_symbol_table(char somethingChar) {
-    Symbol_table* table = new Symbol_table(somethingChar);
-    if (!table) {
-        std::cerr << "Error: Unable to allocate memory for Symbol_table." << std::endl;
-        std::exit(EXIT_FAILURE);
+    
+    if (!upper.expired()) {
+        std::shared_ptr<SymbolTable> upperShared = upper.lock();
+        return upperShared->lookup(name);
+    } else {
+        throw std::invalid_argument("Symbol '" + name + "' not found!");
     }
-    return table;
 }
-//destroy table
-void destroy_symbol_table(Symbol_table* table) {
-    while (table != nullptr) {
-        PycNode* node = table->table;
-        while (node != nullptr) {
-            Postable* post = node->nextPostable;
-            while (post != nullptr) {
-                Postable* tempPost = post;
-                post = post->table;
-                delete tempPost;
-            }
-            PycNode* tempNode = node;
-            node = node->next;
-            delete tempNode;
+
+bool SymbolTable::check_local(const std::string& name) {
+    PycSymbol* sym = symbols;
+    while (sym) {
+        if (sym->typeName == name) {
+            return true;
         }
-        Symbol_table* tempTable = table;
-        table = table->next;
-        delete tempTable;
+        sym = sym->next;
+    }
+    return false;
+}
+
+
+void SymbolTable::print_table() {
+    static bool headerPrinted = false;
+    if (!headerPrinted) {
+        std::cout << std::left
+                  << std::setw(10) << "TableID"
+                  << std::setw(20) << "Name"
+                  << std::setw(20) << "Type"
+                  << std::setw(10) << "DeclLine"
+                  << "Refs" << std::endl;
+        std::cout << std::string(60, '-') << std::endl;
+        headerPrinted = true;
+    }
+
+    std::cout << std::left
+              << std::setw(10) << id;
+
+    PycSymbol* sym = symbols;
+    while (sym) {
+        std::cout << std::left
+                  << std::setw(20) << sym->typeName
+                  << std::setw(20) << sym->typeName  
+                  << std::setw(10) << (sym->declNode ? sym->declNode->line : -1);
+
+     
+        PycSymRef* ref = sym->refs;
+        while (ref) {
+            std::cout << ref->refNode->line << " ";
+            ref = ref->next;
+        }
+        std::cout << std::endl;
+
+        sym = sym->next;
+    }
+
+    
+    if (lower) {
+        lower->print_table();
+    }
+
+ 
+    if (next) {
+        next->print_table();
     }
 }
