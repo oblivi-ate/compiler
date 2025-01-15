@@ -23,3 +23,12 @@ struct Symbol_table{
     struct Symbol_tabel* next;
 };
 
+unsigned long hash_function(char nodeType);
+
+void traverse_symbol_table(struct Symbol_table* table);
+
+void add_symbol(struct Symbol_table* table, char nodeType, int position);
+
+unsigned long get_symbol_hash(char nodeType);
+
+#endif 
