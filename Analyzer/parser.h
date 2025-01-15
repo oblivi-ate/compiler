@@ -34,4 +34,7 @@ TreeNode *call(bool &status);
 TreeNode *args(bool &status);
 TreeNode *arg_list(bool &status);
 
+
+int doParser(int argc, char *argv[], TreeNode *root);
+
 #endif 

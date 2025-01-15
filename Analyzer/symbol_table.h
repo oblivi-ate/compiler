@@ -9,6 +9,9 @@
 
 
 struct SymbolTable;
+struct PycSymbol;
+struct PycSymRef;
+
 
 struct PycSymRef {
     PycSymbol* parent;       

@@ -1089,17 +1089,16 @@ TreeNode *arg_list(bool &status) // arg_list → expression | expression, arg_li
 
 
 
-int main(int argc, char *argv[])
+int doParser(int argc, char *argv[], TreeNode *root)
 {
     std::cout << "Parser: Start" << std::endl;
 
     get_parser_token(argc, argv);
     bool status = false;
-    TreeNode *root = program(status);
+    root = program(status);
     if (status == true)
     {
         std::cout << "Parsing Successfully" << std::endl;
-        // printTree(root);
     }
     else
     {
@@ -1111,3 +1110,4 @@ int main(int argc, char *argv[])
     print_tree(root);
     return 0;
 }
+
